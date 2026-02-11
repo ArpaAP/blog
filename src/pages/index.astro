@@ -1,17 +1,27 @@
 ---
-
+import BaseLayout from '../layouts/BaseLayout.astro';
 ---
 
-<html lang="ko">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/png" href="/favicon.png" />
-		<link rel="icon" href="/favicon.ico" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Alpha Devlog</title>
-	</head>
-	<body>
-		<h1>Alpha Devlog</h1>
-	</body>
-</html>
+<BaseLayout title="Alpha Devlog - Intro">
+  <div class="flex flex-col items-start justify-center min-h-[60vh] animate-fade-in-up">
+    <span class="text-brand-600 font-medium tracking-wider mb-4">HELLO, WORLD</span>
+    <h1 class="text-5xl md:text-7xl font-bold tracking-tight text-gray-900 mb-8 leading-tight">
+      I'm <span class="text-transparent bg-clip-text bg-linear-to-r from-brand-600 to-brand-400">Alpha</span>, <br />
+      a Software Engineer.
+    </h1>
+    
+    <p class="text-xl text-gray-500 max-w-2xl leading-relaxed mb-10">
+      I build accessible, pixel-perfect, and performant web experiences. 
+      Passionate about design systems, clean code, and user-centric interfaces.
+    </p>
+
+    <div class="flex gap-4">
+      <a href="/projects" class="px-6 py-3 bg-brand-600 text-white font-medium rounded-lg hover:bg-brand-700 transition-all shadow-md hover:shadow-xl hover:-translate-y-0.5">
+        View Projects
+      </a>
+      <a href="/articles" class="px-6 py-3 bg-white text-brand-600 font-medium rounded-lg border border-gray-200 hover:border-brand-200 hover:bg-brand-50 transition-all">
+        Read Articles
+      </a>
+    </div>
+  </div>
+</BaseLayout>

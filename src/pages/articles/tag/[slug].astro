@@ -1,0 +1,53 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import CategorySidebar from '../../../components/CategorySidebar.astro';
+import ArticleListItem from '../../../components/ArticleListItem.astro';
+import { ghostClient } from '../../../lib/ghost';
+
+export async function getStaticPaths() {
+  const tags = await ghostClient.tags.browse({ limit: 'all' }).catch(() => []);
+  return tags.map((tag) => ({
+    params: { slug: tag.slug },
+    props: { tag },
+  }));
+}
+
+const { tag } = Astro.props as { tag: any };
+const tagSlug = tag.slug;
+
+const posts = await ghostClient.posts.browse({
+  limit: 'all',
+  include: ['tags', 'authors'],
+  filter: `tag:${tagSlug}`
+}).catch((err) => {
+  console.error(err);
+  return [];
+});
+
+const pageTitle = `Articles tagged "${tag.name}"`;
+---
+
+<BaseLayout title={`${pageTitle} - Alpha Devlog`}>
+  <div class="mb-12">
+    <h1 class="text-4xl font-bold text-gray-900 mb-4">#{tag.name}</h1>
+    <p class="text-gray-500 text-lg">Articles tagged with {tag.name}.</p>
+  </div>
+
+  <div class="flex flex-col md:flex-row gap-12">
+    <CategorySidebar currentTag={tagSlug} />
+    
+    <div class="grow">
+      {posts.length > 0 ? (
+        <div class="flex flex-col">
+          {posts.map((post) => (
+            <ArticleListItem post={post} />
+          ))}
+        </div>
+      ) : (
+        <div class="py-12 text-center text-gray-500 bg-gray-50 rounded-lg border border-dashed border-gray-200">
+          <p>No articles found for this tag.</p>
+        </div>
+      )}
+    </div>
+  </div>
+</BaseLayout>

@@ -1,0 +1,63 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { ghostClient } from '../../lib/ghost';
+
+export async function getStaticPaths() {
+  const posts = await ghostClient.posts.browse({
+    limit: 'all',
+    include: ['tags', 'authors']
+  }).catch(() => []);
+
+  return posts.map((post) => ({
+    params: { slug: post.slug },
+    props: { post },
+  }));
+}
+
+const { post } = Astro.props as { post: any };
+
+const date = new Date(post.published_at).toLocaleDateString('en-US', {
+  weekday: 'long',
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric'
+});
+---
+
+<BaseLayout title={`${post.title} - Alpha Devlog`} description={post.excerpt}>
+  <article class="max-w-4xl mx-auto">
+    <header class="mb-10">
+      <div class="flex items-center gap-2 text-sm text-gray-500 mb-4">
+        <a href="/articles" class="hover:text-brand-600 transition-colors">&larr; Back to Articles</a>
+        <span>&bull;</span>
+        <time datetime={post.published_at}>{date}</time>
+        {post.primary_tag && (
+          <>
+            <span>&bull;</span>
+            <span class="text-brand-600 font-medium">#{post.primary_tag.name}</span>
+          </>
+        )}
+      </div>
+
+      <h1 class="text-4xl md:text-5xl font-bold text-gray-900 leading-tight mb-6">
+        {post.title}
+      </h1>
+
+      {post.feature_image && (
+        <img 
+          src={post.feature_image} 
+          alt={post.feature_image_alt || post.title} 
+          class="w-full h-auto rounded-xl shadow-lg mb-8"
+        />
+      )}
+    </header>
+
+    <div class="prose prose-lg prose-slate hover:prose-a:text-[var(--color-brand-600)] prose-headings:font-bold prose-headings:tracking-tight max-w-none">
+      <Fragment set:html={post.html} />
+    </div>
+
+    <hr class="my-12 border-gray-100" />
+
+    {/* Optional: Add Author Bio or Next/Prev links here */}
+  </article>
+</BaseLayout>

@@ -1,0 +1,37 @@
+---
+import '../styles/global.css';
+import Navbar from '../components/Navbar.astro';
+import '@fontsource/inter/400.css';
+import '@fontsource/inter/500.css';
+import '@fontsource/inter/700.css';
+
+interface Props {
+	title: string;
+  description?: string;
+}
+
+const { title, description = "A developer's journey and portfolio" } = Astro.props;
+---
+
+<!doctype html>
+<html lang="ko">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="description" content={description} />
+		<meta name="viewport" content="width=device-width" />
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<meta name="generator" content={Astro.generator} />
+		<title>{title}</title>
+	</head>
+	<body class="bg-white text-gray-900 antialiased selection:bg-brand-100 selection:text-brand-900">
+    <Navbar />
+    
+    <main class="w-full max-w-5xl mx-auto px-6 py-12 grow">
+      <slot />
+    </main>
+
+    <footer class="w-full max-w-5xl mx-auto px-6 py-8 border-t border-gray-100 text-center text-sm text-gray-400">
+      &copy; {new Date().getFullYear()} Alpha Devlog. All rights reserved.
+    </footer>
+	</body>
+</html>
