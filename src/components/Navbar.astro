@@ -6,11 +6,12 @@ const links = [
 ];
 
 const { pathname } = Astro.url;
+import '@fontsource/fira-mono';
 ---
 
-<nav class="w-full max-w-5xl mx-auto px-6 py-6 flex justify-between items-center bg-white/90 backdrop-blur-sm sticky top-0 z-50 border-b border-gray-100">
+<nav class="w-full max-w-5xl mx-auto px-6 py-6 flex justify-between items-center bg-white/90 backdrop-blur-sm sticky top-0 z-50 border-b border-gray-100" style="font-family: 'Fira Mono', monospace;">
   <a href="/" class="text-xl font-bold tracking-tight text-gray-900 hover:text-brand-600 transition-colors">
-    Alpha Devlog
+    Studio Alpha
   </a>
   
   <div class="flex items-center gap-8">
