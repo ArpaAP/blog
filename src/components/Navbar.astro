@@ -3,7 +3,7 @@ const links = [
   { name: '소개', href: '/' },
   { name: '프로젝트', href: '/projects' },
   { name: '게시글', href: '/articles' },
-  ...process.env.NODE_ENV === 'development' ? [{ name: 'Keystatic', href: '/keystatic' }] : []  
+  ...process.env.NODE_ENV === 'development' ? [{ name: 'Keystatic', href: '/keystatic' }] : []
 ];
 
 const { pathname } = Astro.url;
@@ -25,7 +25,7 @@ const innerContainerClass = "max-w-5xl mx-auto px-6 py-4 flex justify-between it
   class:list={[ navBaseClass ]}
 >
   <div class={innerContainerClass}>
-    <a href="/" id="nav-logo" class="flex items-center gap-3 text-3xl" style="font-family: 'Dancing Script', cursive;">
+    <a href="/" id="nav-logo" class="flex items-center gap-3 text-3xl transition-colors" style="font-family: 'Dancing Script', cursive;">
       devlog alpha
     </a>
     
