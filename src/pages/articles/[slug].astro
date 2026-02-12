@@ -24,40 +24,67 @@ const date = new Date(post.published_at).toLocaleDateString('en-US', {
 });
 ---
 
-<BaseLayout title={`${post.title} - Alpha Devlog`} description={post.excerpt}>
-  <article class="max-w-4xl mx-auto">
-    <header class="mb-10">
-      <div class="flex items-center gap-2 text-sm text-gray-500 mb-4">
-        <a href="/articles" class="hover:text-brand-600 transition-colors">&larr; Back to Articles</a>
-        <span>&bull;</span>
-        <time datetime={post.published_at}>{date}</time>
-        {post.primary_tag && (
-          <>
-            <span>&bull;</span>
-            <span class="text-brand-600 font-medium">#{post.primary_tag.name}</span>
-          </>
-        )}
-      </div>
-
-      <h1 class="text-4xl md:text-5xl font-bold text-gray-900 leading-tight mb-6">
-        {post.title}
-      </h1>
-
-      {post.feature_image && (
+<BaseLayout title={`${post.title} - Devlog Alpha`} description={post.excerpt} transparentNavbar={!!post.feature_image}>
+  {post.feature_image ? (
+    <div slot="hero" class="relative w-full h-[60vh] min-h-[400px] flex items-center justify-center overflow-hidden bg-gray-900 mb-12">
+      <div class="absolute inset-0 z-0">
         <img 
           src={post.feature_image} 
           alt={post.feature_image_alt || post.title} 
-          class="w-full h-auto rounded-xl shadow-lg mb-8"
+          class="w-full h-full object-cover opacity-60 blur-sm scale-105"
         />
-      )}
-    </header>
+        <div class="absolute inset-0 bg-black/40"></div>
+      </div>
+      
+      <div class="relative z-10 w-full max-w-4xl mx-auto px-6 text-center">
+        <div class="flex items-center justify-center gap-3 text-sm font-medium text-gray-200 mb-6">
+          <time datetime={post.published_at}>{date}</time>
+          {post.primary_tag && (
+            <>
+              <span class="text-gray-400">&bull;</span>
+              <span class="text-brand-300">#{post.primary_tag.name}</span>
+            </>
+          )}
+        </div>
+        
+        <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold text-white tracking-tight leading-tight drop-shadow-lg">
+          {post.title}
+        </h1>
+      </div>
+    </div>
+  ) : null}
+
+  <article class="max-w-4xl mx-auto">
+    <div class="mb-8">
+      <a href="/articles" class="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-brand-600 transition-colors">
+        &larr; Back to Articles
+      </a>
+    </div>
+
+    {!post.feature_image && (
+      <header class="mb-10">
+        <div class="flex items-center gap-2 text-sm text-gray-500 mb-4">
+          <time datetime={post.published_at}>{date}</time>
+          {post.primary_tag && (
+            <>
+              <span>&bull;</span>
+              <span class="text-brand-600 font-medium">#{post.primary_tag.name}</span>
+            </>
+          )}
+        </div>
+
+        <h1 class="text-4xl md:text-5xl font-bold text-gray-900 leading-tight mb-6">
+          {post.title}
+        </h1>
+      </header>
+    )}
 
     <div class="prose prose-lg prose-slate hover:prose-a:text-[var(--color-brand-600)] prose-headings:font-bold prose-headings:tracking-tight max-w-none">
       <Fragment set:html={post.html} />
     </div>
 
     <hr class="my-12 border-gray-100" />
-
+    
     {/* Optional: Add Author Bio or Next/Prev links here */}
   </article>
 </BaseLayout>

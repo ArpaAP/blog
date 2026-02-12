@@ -1,33 +1,125 @@
 ---
 const links = [
-  { name: 'INTRO', href: '/' },
-  { name: 'PROJECTS', href: '/projects' },
-  { name: 'ARTICLES', href: '/articles' },
+  { name: '소개', href: '/' },
+  { name: '프로젝트', href: '/projects' },
+  { name: '게시글', href: '/articles' },
 ];
 
 const { pathname } = Astro.url;
+const { isTransparent = false } = Astro.props;
+
 import '@fontsource/fira-mono';
+
+// Base classes always applied
+// Base classes for the outer nav element (positioning, z-index, transition)
+const navBaseClass = "w-full transition-all duration-300 z-50";
+
+// Inner container for centering content
+const innerContainerClass = "max-w-5xl mx-auto px-6 py-6 flex justify-between items-center";
 ---
 
-<nav class="w-full max-w-5xl mx-auto px-6 py-6 flex justify-between items-center bg-white/90 backdrop-blur-sm sticky top-0 z-50 border-b border-gray-100" style="font-family: 'Fira Mono', monospace;">
-  <a href="/" class="text-xl font-bold tracking-tight text-gray-900 hover:text-brand-600 transition-colors">
-    Studio Alpha
-  </a>
-  
-  <div class="flex items-center gap-8">
-    {links.map((link) => {
-      const isActive = link.href === '/' ? pathname === '/' : pathname.startsWith(link.href);
-      return (
-        <a 
-          href={link.href}
-          class:list={[
-            "text-sm font-medium tracking-wide transition-colors duration-200",
-            isActive ? "text-brand-600" : "text-gray-500 hover:text-brand-600"
-          ]}
-        >
-          {link.name}
-        </a>
-      );
-    })}
+<nav 
+  id="navbar"
+  data-transparent={isTransparent.toString()} 
+  class:list={[ navBaseClass ]}
+>
+  <div class={innerContainerClass}>
+    <a href="/" id="nav-logo" class="text-xl font-bold tracking-tight transition-colors" style="font-family: 'Fira Mono', monospace;">
+      Devlog Alpha
+    </a>
+    
+    <div class="flex items-center gap-8">
+      {links.map((link) => {
+        const isActive = link.href === '/' ? pathname === '/' : pathname.startsWith(link.href);
+        return (
+          <a 
+            href={link.href}
+            class:list={[
+              "nav-link text-sm tracking-wide transition-colors duration-200 font-medium",
+              isActive ? "active font-bold" : "font-semibold"
+            ]}
+          >
+            {link.name}
+          </a>
+        );
+      })}
+    </div>
   </div>
 </nav>
+
+<script>
+  const navbar = document.getElementById('navbar');
+  const isTransparentPage = navbar?.dataset.transparent === 'true';
+
+  if (isTransparentPage && navbar) {
+    const handleScroll = () => {
+      const scrollY = window.scrollY;
+      // Toggle 'scrolled' state when passing 200px
+      if (scrollY > 528 - 77) {
+        navbar.dataset.scrolled = 'true';
+      } else {
+        navbar.dataset.scrolled = 'false';
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    // Initial check
+    handleScroll();
+  }
+</script>
+
+<style>
+  @reference "../styles/global.css";
+  
+  /* Default State (Standard Pages) */
+  nav {
+    @apply bg-white/90 backdrop-blur-sm sticky top-0 border-b border-gray-200;
+  }
+  
+  #nav-logo {
+    @apply text-gray-900 hover:text-brand-600;
+  }
+  
+  .nav-link {
+    @apply text-gray-500 hover:text-brand-600;
+  }
+  
+  .nav-link.active {
+    @apply text-brand-600;
+  }
+
+  /* Transparent Page State */
+  nav[data-transparent="true"] {
+    @apply fixed top-0 left-0 right-0 border-transparent bg-transparent bg-none backdrop-blur-none border-b-0;
+  }
+  
+  /* Initial Transparent State (Top) */
+  nav[data-transparent="true"]:not([data-scrolled="true"]) #nav-logo {
+    @apply text-white hover:text-white/80;
+  }
+  
+  nav[data-transparent="true"]:not([data-scrolled="true"]) .nav-link {
+    @apply text-gray-300 hover:text-white;
+  }
+  
+  nav[data-transparent="true"]:not([data-scrolled="true"]) .nav-link.active {
+    @apply text-white;
+  }
+
+  /* Scrolled State on Transparent Page (Becomes Standard-like) */
+  nav[data-transparent="true"][data-scrolled="true"] {
+    @apply bg-white/90 backdrop-blur-sm border-b border-gray-200;
+  }
+  
+  nav[data-transparent="true"][data-scrolled="true"] #nav-logo {
+    @apply text-gray-900;
+  }
+  
+  nav[data-transparent="true"][data-scrolled="true"] .nav-link {
+    @apply text-gray-500 hover:text-brand-600;
+  }
+  
+  nav[data-transparent="true"][data-scrolled="true"] .nav-link.active {
+    @apply text-brand-600;
+  }
+</style>
