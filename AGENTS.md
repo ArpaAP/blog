@@ -4,53 +4,45 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Personal developer blog ("Devlog Alpha") for Buyeon Hwang, built with Astro 5 and Tailwind CSS 4. Articles are sourced from a Ghost CMS instance via the Content API. The site is statically generated (SSG).
+Personal developer blog and portfolio for Buyeon Hwang ("Devlog Alpha"). Built with Astro 5 as a static site (SSG) using MDX for article content.
 
 ## Commands
 
 - `pnpm dev` — Start dev server
-- `pnpm build` — Production build (static output)
-- `pnpm preview` — Preview production build locally
+- `pnpm build` — Production build
+- `pnpm preview` — Preview production build
 
-Package manager is **pnpm** (see `pnpm-lock.yaml`).
+Package manager: **pnpm**
 
 ## Architecture
 
-### Content Sources
+- **Framework**: Astro 5 with MDX integration, Tailwind CSS v4 (via Vite plugin)
+- **Output**: Static site generation (no SSR)
+- **Language**: Korean (`lang="ko"`), uses Pretendard Variable font
 
-- **Articles**: Fetched at build time from Ghost CMS via `@tryghost/content-api`. The client is configured in `src/lib/ghost.ts`. Environment variables `API_URL` and `CONTENT_API_KEY` control the Ghost instance (defaults to Ghost demo site).
-- **Projects**: Static data defined in `src/data/projects.ts` (typed `Project[]` array).
+### Content System
 
-### Routing & Pages
+Articles are MDX files in `src/content/articles/`. The content collection is defined in `src/content.config.ts` with this frontmatter schema:
 
-- `/` — Landing/intro page
-- `/articles` — Article list with tag sidebar, posts fetched from Ghost
-- `/articles/[slug]` — Individual article (uses `getStaticPaths` from Ghost posts)
-- `/articles/tag/[slug]` — Articles filtered by tag (uses `getStaticPaths` from Ghost tags)
-- `/projects` — Project showcase from static data
+```yaml
+title: string (required)
+published_at: date (required)
+feature_image: string (optional) — enables hero image layout on article page
+feature_image_alt: string (optional)
+tags: string[] (defaults to [])
+excerpt: string (optional)
+```
 
-### Layout System
+Article slugs are derived from file names. Routes: `/articles/[slug]`, `/articles/tag/[slug]`.
 
-`BaseLayout.astro` is the single shared layout. It accepts:
-- `title` (required), `description`, `transparentNavbar` props
-- A named `hero` slot for full-bleed content above `<main>` (used by article detail pages with feature images)
+### Key Layout Patterns
+
+- `BaseLayout.astro` — Root layout with dark mode support (class-based, `localStorage`), navbar, footer
+- Article pages have two layouts: hero image (when `feature_image` exists) vs. standard header
+- Projects data is in `src/data/projects.ts` (static TypeScript array, not a content collection)
 
 ### Styling
 
-- Tailwind CSS 4 via `@tailwindcss/vite` plugin (configured in `astro.config.mjs`)
-- Custom `brand` color palette (purple-based, 50–950) defined as CSS custom properties in `src/styles/global.css` using `@theme`
-- Fonts: Inter (body via `@fontsource/inter`), Fira Mono (logo via `@fontsource/fira-mono`)
-
-### Navbar Behavior
-
-The navbar (`src/components/Navbar.astro`) has two modes:
-- **Standard**: Sticky, white background with blur
-- **Transparent**: Fixed, transparent at top, transitions to standard style on scroll (controlled by `data-transparent` and `data-scrolled` attributes with client-side JS)
-
-Navigation labels are in Korean (소개, 프로젝트, 게시글).
-
-## Environment Variables
-
-Set in `.env` (not committed patterns may vary):
-- `API_URL` — Ghost CMS URL
-- `CONTENT_API_KEY` — Ghost Content API key
+- Tailwind CSS v4 with custom `brand` color palette (violet-based, defined in `src/styles/global.css`)
+- Dark mode uses `.dark` class on `<html>` with `@custom-variant dark`
+- Typography in articles uses Tailwind's `prose` classes

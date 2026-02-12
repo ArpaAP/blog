@@ -55,7 +55,7 @@ const innerContainerClass = "max-w-5xl mx-auto px-6 py-6 flex justify-between it
     const handleScroll = () => {
       const scrollY = window.scrollY;
       // Toggle 'scrolled' state when passing 200px
-      if (scrollY > 528 - 77) {
+      if (scrollY > 480 - 77) {
         navbar.dataset.scrolled = 'true';
       } else {
         navbar.dataset.scrolled = 'false';
@@ -73,7 +73,7 @@ const innerContainerClass = "max-w-5xl mx-auto px-6 py-6 flex justify-between it
   
   /* Default State (Standard Pages) */
   nav {
-    @apply bg-white/90 dark:bg-neutral-950/90 backdrop-blur-sm sticky top-0 border-b border-gray-200 dark:border-neutral-800;
+    @apply bg-white/90 dark:bg-neutral-950/90 backdrop-blur-sm sticky top-0 border-b border-gray-100 dark:border-neutral-800;
   }
   
   #nav-logo {
@@ -104,7 +104,7 @@ const innerContainerClass = "max-w-5xl mx-auto px-6 py-6 flex justify-between it
 
   /* Scrolled State on Transparent Page (Becomes Standard-like) */
   nav[data-transparent="true"][data-scrolled="true"] {
-    @apply bg-white/90 dark:bg-neutral-950/90 backdrop-blur-sm border-b border-gray-200 dark:border-neutral-800;
+    @apply bg-white/90 dark:bg-neutral-950/90 backdrop-blur-sm border-b border-gray-100 dark:border-neutral-800;
   }
   
   nav[data-transparent="true"][data-scrolled="true"] #nav-logo {

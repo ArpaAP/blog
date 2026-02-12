@@ -1,6 +1,7 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { getCollection, render } from 'astro:content';
+import type { CollectionEntry } from 'astro:content';
 
 export async function getStaticPaths() {
   const posts = await getCollection('articles');
@@ -10,8 +11,14 @@ export async function getStaticPaths() {
   }));
 }
 
+
+interface Props {
+  post: CollectionEntry<'articles'>;
+}
+
 const { post } = Astro.props;
-const { Content } = await render(post);
+const { Content, headings, remarkPluginFrontmatter } = await render(post);
+const readingTime = remarkPluginFrontmatter?.minutesRead;
 
 const date = new Date(post.data.published_at).toLocaleDateString('ko-KR', {
   weekday: 'long',
@@ -23,7 +30,7 @@ const date = new Date(post.data.published_at).toLocaleDateString('ko-KR', {
 
 <BaseLayout title={`${post.data.title} - Devlog Alpha`} description={post.data.excerpt} transparentNavbar={!!post.data.feature_image}>
   {post.data.feature_image ? (
-    <div slot="hero" class="relative w-full h-[60vh] min-h-[400px] flex items-center justify-center overflow-hidden bg-gray-900 mb-12">
+    <div slot="hero" class="relative w-full h-[60vh] min-h-[480px] flex items-center justify-center overflow-hidden bg-gray-900 mb-12">
       <div class="absolute inset-0 z-0">
         <img 
           src={post.data.feature_image} 
@@ -34,52 +41,131 @@ const date = new Date(post.data.published_at).toLocaleDateString('ko-KR', {
       </div>
       
       <div class="relative z-10 w-full max-w-4xl mx-auto px-6 text-center">
-        <div class="flex items-center justify-center gap-3 text-sm font-medium text-gray-200 mb-6">
-          <time datetime={post.data.published_at.toISOString()}>{date}</time>
-          {post.data.tags && post.data.tags.length > 0 && (
-            <>
-              <span class="text-gray-400">&bull;</span>
-              <span class="text-brand-300">#{post.data.tags[0]}</span>
-            </>
-          )}
-        </div>
-        
-        <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold text-white tracking-tight leading-tight drop-shadow-lg">
+        <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold text-white tracking-tight leading-tight drop-shadow-lg mt-8 mb-12">
           {post.data.title}
         </h1>
+
+        <div class="flex flex-col items-center justify-center gap-2 text-sm font-medium text-gray-200">
+          {post.data.tags && post.data.tags.length > 0 && (
+            <div class="flex flex-wrap items-center justify-center gap-2 mb-1">
+              {post.data.tags.map((tag) => (
+                <span class="text-brand-300 text-base">#{tag}</span>
+              ))}
+            </div>
+          )}
+          <div class="flex items-center gap-3">
+            <time datetime={post.data.published_at.toISOString()}>{date}</time>
+            {readingTime && (
+              <>
+                <span class="text-gray-400">&bull;</span>
+                <span class="text-gray-300">{readingTime}</span>
+              </>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   ) : null}
 
-  <article class="max-w-4xl mx-auto">
-    <div class="mb-8">
-      <a href="/articles" class="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-brand-600 transition-colors">
-        &larr; Back to Articles
-      </a>
-    </div>
+  <div class="max-w-7xl mx-auto flex flex-col lg:flex-row gap-12">
+    <article class="w-full lg:w-[80%] min-w-0">
+      <div class="mb-8">
+        <a href="/articles" class="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-brand-600 transition-colors">
+          &larr; Back to Articles
+        </a>
+      </div>
 
-    {!post.data.feature_image && (
-      <header class="mb-10">
-        <div class="flex items-center gap-2 text-sm text-gray-500 mb-4">
-          <time datetime={post.data.published_at.toISOString()}>{date}</time>
-          {post.data.tags && post.data.tags.length > 0 && (
-            <>
-              <span>&bull;</span>
-              <span class="text-brand-600 font-medium">#{post.data.tags[0]}</span>
-            </>
-          )}
-        </div>
+      {!post.data.feature_image && (
+        <header class="mb-10">
+          <h1 class="text-4xl md:text-5xl font-bold text-gray-900 leading-tight mb-4">
+            {post.data.title}
+          </h1>
 
-        <h1 class="text-4xl md:text-5xl font-bold text-gray-900 leading-tight mb-6">
-          {post.data.title}
-        </h1>
-      </header>
-    )}
+          <div class="flex flex-col gap-2 text-sm text-gray-500">
+            {post.data.tags && post.data.tags.length > 0 && (
+              <span class="text-brand-600 font-medium text-base">#{post.data.tags[0]}</span>
+            )}
+            <div class="flex items-center gap-2">
+              <time datetime={post.data.published_at.toISOString()}>{date}</time>
+              {readingTime && (
+                <>
+                  <span>&bull;</span>
+                  <span>{readingTime}</span>
+                </>
+              )}
+            </div>
+          </div>
+        </header>
+      )}
 
-    <div class="prose prose-lg prose-slate hover:prose-a:text-[var(--color-brand-600)] prose-headings:font-bold prose-headings:tracking-tight max-w-none">
-      <Content />
-    </div>
+      <div class="prose prose-lg prose-slate dark:prose-invert hover:prose-a:text-brand-600 prose-headings:font-bold prose-headings:tracking-tight max-w-none">
+        <Content />
+      </div>
 
-    {/* Optional: Add Author Bio or Next/Prev links here */}
-  </article>
+      {/* Optional: Add Author Bio or Next/Prev links here */}
+    </article>
+
+    <aside class="hidden lg:block w-[20%] shrink-0">
+      <div class="sticky top-24 pt-4">
+        <h2 class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">On this page</h2>
+        <nav>
+          <ul class="space-y-1 text-sm border-l-2 border-gray-200 dark:border-neutral-800">
+            {headings.map((heading) => (
+              <li>
+                <a
+                  href={`#${heading.slug}`}
+                  class="toc-link block py-1 -ml-[2px] text-gray-500 hover:text-gray-900 dark:text-neutral-500 dark:hover:text-neutral-300 transition-all duration-200 border-l-2 border-transparent hover:border-gray-300"
+                  data-slug={heading.slug}
+                  style={{ paddingLeft: `${1 + (heading.depth - 1) * 0.75}rem` }}
+                >
+                  {heading.text}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </nav>
+      </div>
+    </aside>
+  </div>
+
+  <script>
+    const ACTIVE_CLASSES = ['!text-brand-600', 'dark:!text-brand-300', '!font-bold', '!border-brand-600', 'dark:!border-brand-300'];
+
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            const id = entry.target.getAttribute('id');
+            document.querySelectorAll('.toc-link').forEach((l) => {
+              l.classList.remove(...ACTIVE_CLASSES);
+            });
+
+            const link = document.querySelector(`.toc-link[data-slug="${id}"]`);
+            if (link) {
+              link.classList.add(...ACTIVE_CLASSES);
+            }
+          }
+        });
+      }, {
+        rootMargin: '-100px 0px -66% 0px'
+      });
+
+      document.querySelectorAll('.prose h1, .prose h2, .prose h3, .prose h4').forEach((heading) => {
+        observer.observe(heading);
+      });
+
+      document.querySelectorAll('.toc-link').forEach(link => {
+        link.addEventListener('click', (e) => {
+          e.preventDefault();
+          const targetId = link.getAttribute('href')?.substring(1);
+          const target = document.getElementById(targetId!);
+          if (target) {
+            window.scrollTo({
+              top: target.offsetTop - 100,
+              behavior: 'smooth'
+            });
+            history.pushState(null, '', `#${targetId}`);
+          }
+        });
+      });
+  </script>
 </BaseLayout>

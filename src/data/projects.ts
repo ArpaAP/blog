@@ -9,8 +9,7 @@ export interface Project {
 export const projects: Project[] = [
   {
     title: "Aztra",
-    description:
-      "A comprehensive dashboard for monitoring server health and performance metrics in real-time.",
+    description: "A beautiful Discord bot",
     link: "https://aztra.xyz",
     tags: ["React", "TypeScript", "Node.js"],
     year: "SINCE 2020",
