@@ -8,21 +8,21 @@ interface Props {
 const { project } = Astro.props;
 ---
 
-<a href={project.link} target="_blank" rel="noopener noreferrer" class="group block p-6 bg-white rounded-xl border border-gray-100 shadow-sm hover:shadow-md hover:border-brand-200 transition-all duration-300">
+<a href={project.link} target="_blank" rel="noopener noreferrer" class="group block p-6 bg-white/5 rounded-xl border border-gray-100 dark:border-neutral-800 shadow-sm hover:shadow-md transition-all duration-300">
   <div class="flex justify-between items-start mb-4">
-    <h3 class="text-xl font-bold text-gray-900 group-hover:text-brand-600 transition-colors">
+    <h3 class="text-xl font-bold text-gray-900 dark:text-neutral-100 group-hover:text-brand-600 transition-colors">
       {project.title}
     </h3>
-    <span class="text-xs font-mono text-gray-400 bg-gray-50 px-2 py-1 rounded">{project.year}</span>
+    <span class="text-xs font-mono text-gray-400 bg-gray-50 px-2 py-1 rounded dark:text-neutral-300 dark:bg-gray-900">{project.year}</span>
   </div>
   
-  <p class="text-gray-600 mb-6 leading-relaxed">
+  <p class="text-gray-600 dark:text-neutral-300 mb-6 leading-relaxed">
     {project.description}
   </p>
 
   <div class="flex flex-wrap gap-2">
     {project.tags.map((tag) => (
-      <span class="px-2 py-1 text-xs font-medium text-brand-700 bg-brand-50 rounded-md">
+      <span class="px-2 py-1 text-xs font-medium text-brand-700 bg-brand-50 rounded-md dark:text-brand-300 dark:bg-brand-900">
         {tag}
       </span>
     ))}
