@@ -1,9 +1,8 @@
 ---
 import '../styles/global.css';
 import Navbar from '../components/Navbar.astro';
-import '@fontsource/inter/400.css';
-import '@fontsource/inter/500.css';
-import '@fontsource/inter/700.css';
+import ThemeToggle from '../components/ThemeToggle.astro';
+
 
 interface Props {
 	title: string;
@@ -24,8 +23,20 @@ const { title, description = "A developer's journey and portfolio", transparentN
 		<link rel="icon" href="/favicon.ico" />
 		<meta name="generator" content={Astro.generator} />
 		<title>{title}</title>
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.css" />
+    <script is:inline>
+      if (
+        localStorage.getItem("theme") === "dark" ||
+        (!("theme" in localStorage) &&
+          window.matchMedia("(prefers-color-scheme: dark)").matches)
+      ) {
+        document.documentElement.classList.add("dark");
+      } else {
+        document.documentElement.classList.remove("dark");
+      }
+    </script>
 	</head>
-	<body class="bg-white text-gray-900 antialiased selection:bg-brand-100 selection:text-brand-900">
+	<body class="bg-white dark:bg-neutral-950 text-gray-900 dark:text-neutral-100 antialiased selection:bg-brand-100 dark:selection:bg-brand-900 selection:text-brand-900 dark:selection:text-brand-100">
     <Navbar isTransparent={transparentNavbar} />
     
     <slot name="hero" />
@@ -34,8 +45,11 @@ const { title, description = "A developer's journey and portfolio", transparentN
       <slot />
     </main>
 
-    <footer class="w-full max-w-5xl mx-auto px-6 py-8 border-t border-gray-100 text-center text-sm text-gray-400">
-      &copy; {new Date().getFullYear()} Devlog Alpha. All rights reserved.
+    <footer class="w-full max-w-5xl mx-auto px-6 py-8 border-t border-gray-100 dark:border-neutral-800 text-center text-sm text-gray-400 dark:text-neutral-500 flex flex-col gap-4 items-center">
+      <div>
+        &copy; {new Date().getFullYear()} Devlog Alpha. All rights reserved.
+      </div>
+      <ThemeToggle />
     </footer>
 	</body>
 </html>

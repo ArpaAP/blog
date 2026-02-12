@@ -12,14 +12,14 @@ const { currentTag } = Astro.props;
 
 <aside class="w-full md:w-64 shrink-0">
   <div class="sticky top-24">
-    <h3 class="font-bold text-gray-900 mb-4 tracking-wide text-sm uppercase">Categories</h3>
+    <h3 class="font-bold text-gray-900 dark:text-gray-100 mb-4 tracking-wide text-sm uppercase">Categories</h3>
     <ul class="space-y-2">
       <li>
         <a 
           href="/articles" 
           class:list={[
             "flex justify-between items-center group px-3 py-2 rounded-lg transition-colors text-sm",
-            !currentTag ? "bg-brand-50 text-brand-700 font-medium" : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+            !currentTag ? "bg-brand-50 dark:bg-brand-900/20 text-brand-700 dark:text-brand-300 font-medium" : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-white/5 hover:text-gray-900 dark:hover:text-gray-200"
           ]}
         >
           <span>All Posts</span>
@@ -31,11 +31,11 @@ const { currentTag } = Astro.props;
             href={`/articles/tag/${tag.slug}`}
             class:list={[
               "flex justify-between items-center group px-3 py-2 rounded-lg transition-colors text-sm",
-              currentTag === tag.slug ? "bg-brand-50 text-brand-700 font-medium" : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+              currentTag === tag.slug ? "bg-brand-50 dark:bg-brand-900/20 text-brand-700 dark:text-brand-300 font-medium" : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-white/5 hover:text-gray-900 dark:hover:text-gray-200"
             ]}
           >
             <span>{tag.name}</span>
-            <span class="text-xs text-gray-400 group-hover:text-gray-500 bg-gray-50 group-hover:bg-white px-2 py-0.5 rounded-full transition-colors">
+            <span class="text-xs text-gray-400 bg-gray-50 dark:bg-white/7 group-hover:bg-white dark:group-hover:bg-white/5 px-2 py-0.5 rounded-full transition-colors">
               {tag.count?.posts}
             </span>
           </a>

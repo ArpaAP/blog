@@ -36,7 +36,7 @@ const innerContainerClass = "max-w-5xl mx-auto px-6 py-6 flex justify-between it
             href={link.href}
             class:list={[
               "nav-link text-sm tracking-wide transition-colors duration-200 font-medium",
-              isActive ? "active font-bold" : "font-semibold"
+              isActive ? "active font-bold" : "font-medium"
             ]}
           >
             {link.name}
@@ -73,19 +73,19 @@ const innerContainerClass = "max-w-5xl mx-auto px-6 py-6 flex justify-between it
   
   /* Default State (Standard Pages) */
   nav {
-    @apply bg-white/90 backdrop-blur-sm sticky top-0 border-b border-gray-200;
+    @apply bg-white/90 dark:bg-neutral-950/90 backdrop-blur-sm sticky top-0 border-b border-gray-200 dark:border-neutral-800;
   }
   
   #nav-logo {
-    @apply text-gray-900 hover:text-brand-600;
+    @apply text-gray-900 dark:text-neutral-100 hover:text-brand-600 dark:hover:text-brand-400;
   }
   
   .nav-link {
-    @apply text-gray-500 hover:text-brand-600;
+    @apply text-gray-500 dark:text-neutral-400 hover:text-brand-600 dark:hover:text-brand-400;
   }
   
   .nav-link.active {
-    @apply text-brand-600;
+    @apply text-brand-600 dark:text-brand-400;
   }
 
   /* Transparent Page State */
@@ -98,28 +98,24 @@ const innerContainerClass = "max-w-5xl mx-auto px-6 py-6 flex justify-between it
     @apply text-white hover:text-white/80;
   }
   
-  nav[data-transparent="true"]:not([data-scrolled="true"]) .nav-link {
-    @apply text-gray-300 hover:text-white;
-  }
-  
   nav[data-transparent="true"]:not([data-scrolled="true"]) .nav-link.active {
     @apply text-white;
   }
 
   /* Scrolled State on Transparent Page (Becomes Standard-like) */
   nav[data-transparent="true"][data-scrolled="true"] {
-    @apply bg-white/90 backdrop-blur-sm border-b border-gray-200;
+    @apply bg-white/90 dark:bg-neutral-950/90 backdrop-blur-sm border-b border-gray-200 dark:border-neutral-800;
   }
   
   nav[data-transparent="true"][data-scrolled="true"] #nav-logo {
-    @apply text-gray-900;
+    @apply text-gray-900 dark:text-neutral-100;
   }
   
   nav[data-transparent="true"][data-scrolled="true"] .nav-link {
-    @apply text-gray-500 hover:text-brand-600;
+    @apply text-gray-500 dark:text-neutral-400 hover:text-brand-600 dark:hover:text-brand-400;
   }
   
   nav[data-transparent="true"][data-scrolled="true"] .nav-link.active {
-    @apply text-brand-600;
+    @apply text-brand-600 dark:text-brand-400;
   }
 </style>

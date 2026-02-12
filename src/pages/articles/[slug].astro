@@ -16,7 +16,7 @@ export async function getStaticPaths() {
 
 const { post } = Astro.props as { post: any };
 
-const date = new Date(post.published_at).toLocaleDateString('en-US', {
+const date = new Date(post.published_at).toLocaleDateString('ko-KR', {
   weekday: 'long',
   year: 'numeric',
   month: 'long',
@@ -83,8 +83,6 @@ const date = new Date(post.published_at).toLocaleDateString('en-US', {
       <Fragment set:html={post.html} />
     </div>
 
-    <hr class="my-12 border-gray-100" />
-    
     {/* Optional: Add Author Bio or Next/Prev links here */}
   </article>
 </BaseLayout>
