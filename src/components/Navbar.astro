@@ -8,14 +8,14 @@ const links = [
 const { pathname } = Astro.url;
 const { isTransparent = false } = Astro.props;
 
-import '@fontsource/fira-mono';
+import '@fontsource/dancing-script';
 
 // Base classes always applied
 // Base classes for the outer nav element (positioning, z-index, transition)
 const navBaseClass = "w-full transition-all duration-300 z-50";
 
 // Inner container for centering content
-const innerContainerClass = "max-w-5xl mx-auto px-6 py-6 flex justify-between items-center";
+const innerContainerClass = "max-w-5xl mx-auto px-6 py-4 flex justify-between items-center";
 ---
 
 <nav 
@@ -24,8 +24,8 @@ const innerContainerClass = "max-w-5xl mx-auto px-6 py-6 flex justify-between it
   class:list={[ navBaseClass ]}
 >
   <div class={innerContainerClass}>
-    <a href="/" id="nav-logo" class="text-xl font-bold tracking-tight transition-colors" style="font-family: 'Fira Mono', monospace;">
-      Devlog Alpha
+    <a href="/" id="nav-logo" class="flex items-center gap-3 text-3xl" style="font-family: 'Dancing Script', cursive;">
+      devlog alpha
     </a>
     
     <div class="flex items-center gap-8">
@@ -55,7 +55,7 @@ const innerContainerClass = "max-w-5xl mx-auto px-6 py-6 flex justify-between it
     const handleScroll = () => {
       const scrollY = window.scrollY;
       // Toggle 'scrolled' state when passing 200px
-      if (scrollY > 480 - 77) {
+      if (scrollY > 480 - 70) {
         navbar.dataset.scrolled = 'true';
       } else {
         navbar.dataset.scrolled = 'false';
@@ -77,7 +77,7 @@ const innerContainerClass = "max-w-5xl mx-auto px-6 py-6 flex justify-between it
   }
   
   #nav-logo {
-    @apply text-gray-900 dark:text-neutral-100 hover:text-brand-600 dark:hover:text-brand-400;
+    @apply text-gray-900 dark:text-neutral-100;
   }
   
   .nav-link {
