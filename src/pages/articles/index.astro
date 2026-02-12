@@ -2,15 +2,11 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import CategorySidebar from '../../components/CategorySidebar.astro';
 import ArticleListItem from '../../components/ArticleListItem.astro';
-import { ghostClient } from '../../lib/ghost';
+import { getCollection } from 'astro:content';
 
-const posts = await ghostClient.posts.browse({
-  limit: 'all',
-  include: ['tags', 'authors']
-}).catch((err) => {
-  console.error(err);
-  return [];
-});
+const posts = (await getCollection('articles')).sort(
+  (a, b) => b.data.published_at.valueOf() - a.data.published_at.valueOf()
+);
 
 const pageTitle = "Articles";
 ---
