@@ -73,3 +73,10 @@ html.dark .astro-code span {
     }
   }
 }
+
+/* Ensure KaTeX block math doesn't overflow horizontally on small screens */
+.katex-display {
+  overflow-x: auto;
+  overflow-y: hidden;
+  max-width: 100%;
+}
