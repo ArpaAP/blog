@@ -187,9 +187,9 @@ int main() {
     long long N;
     cin >> N;
 
-    int l = static_cast<int>(floor(log10(N)));
+    int l = (int)log10(N);
 
-    long long answer = (l + 1) * (N + 1) + ((1 - static_cast<long long>(pow(10, l + 1))) / 9);
+    long long answer = (l + 1) * (N + 1) + (1 - (long long)pow(10, l + 1)) / 9;
 
     cout << answer % 1234567 << endl;
 
