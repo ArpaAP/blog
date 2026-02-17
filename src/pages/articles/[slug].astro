@@ -3,6 +3,7 @@ import BaseLayout from '@/layouts/BaseLayout.astro';
 import CodeBlock from '@/components/mdx/CodeBlock.astro';
 import { getCollection, render } from 'astro:content';
 import type { CollectionEntry } from 'astro:content';
+import { Image } from 'astro:assets';
 
 export async function getStaticPaths() {
   const posts = await getCollection('articles');
@@ -19,6 +20,7 @@ interface Props {
 
 const { post } = Astro.props;
 const { Content, headings, remarkPluginFrontmatter } = await render(post);
+const minDepth = headings.length > 0 ? Math.min(...headings.map((h) => h.depth)) : 1;
 const readingTime = remarkPluginFrontmatter?.minutesRead;
 
 const date = new Date(post.data.published_at).toLocaleDateString('ko-KR', {
@@ -33,7 +35,7 @@ const date = new Date(post.data.published_at).toLocaleDateString('ko-KR', {
   {post.data.feature_image ? (
     <div slot="hero" class="relative w-full h-[60vh] min-h-[480px] flex items-center justify-center overflow-hidden bg-gray-900 mb-12">
       <div class="absolute inset-0 z-0">
-        <img 
+        <Image 
           src={post.data.feature_image} 
           alt={post.data.feature_image_alt || post.data.title} 
           class="w-full h-full object-cover opacity-60 blur-sm scale-105"
@@ -113,13 +115,14 @@ const date = new Date(post.data.published_at).toLocaleDateString('ko-KR', {
         <h2 class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">On this page</h2>
         <nav class="max-h-[calc(100vh-10rem)] overflow-y-auto pr-2 scrollbar-hide">
           <ul class="space-y-1 text-sm border-l-2 border-transparent hover:border-gray-200 dark:hover:border-neutral-800 transition-colors duration-200">
+
             {headings.map((heading) => (
               <li>
                 <a
                   href={`#${heading.slug}`}
                   class="toc-link block py-1 -ml-[2px] text-gray-500 hover:text-gray-900 dark:text-neutral-500 dark:hover:text-neutral-300 transition-all duration-200 border-l-2 border-transparent hover:border-gray-300"
                   data-slug={heading.slug}
-                  style={{ paddingLeft: `${1 + (heading.depth - 1) * 0.75}rem` }}
+                  style={{ paddingLeft: `${1 + (heading.depth - minDepth) * 0.75}rem` }}
                 >
                   {heading.text}
                 </a>
