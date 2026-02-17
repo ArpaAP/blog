@@ -167,90 +167,6 @@ const date = new Date(post.data.published_at).toLocaleDateString("ko-KR", {
     </aside>
   </div>
 
-  <!-- Mobile Table of Contents FAB & Drawer -->
-  <div class="lg:hidden">
-    <!-- FAB Button -->
-    <button
-      id="mobile-toc-btn"
-      class="fixed bottom-8 right-8 z-40 bg-white dark:bg-neutral-800 text-gray-800 dark:text-gray-200 border border-gray-200 dark:border-neutral-700 shadow-xl rounded-full p-4 hover:scale-105 active:scale-95 transition-all duration-200"
-      aria-label="Table of Contents"
-    >
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        class="h-6 w-6"
-        fill="none"
-        viewBox="0 0 24 24"
-        stroke="currentColor"
-      >
-        <path
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          stroke-width="2"
-          d="M4 6h16M4 12h16m-7 6h7"></path>
-      </svg>
-    </button>
-
-    <!-- Drawer Overlay -->
-    <div
-      id="mobile-toc-overlay"
-      class="fixed inset-0 bg-black/50 z-50 opacity-0 pointer-events-none transition-opacity duration-300"
-    >
-    </div>
-
-    <!-- Drawer Content -->
-    <div
-      id="mobile-toc-drawer"
-      class="fixed top-0 right-0 h-full w-[280px] bg-white dark:bg-neutral-900 shadow-2xl z-50 transform translate-x-full transition-transform duration-300 ease-in-out overflow-y-auto"
-    >
-      <div class="p-6">
-        <div class="flex justify-between items-center mb-6">
-          <h2 class="text-lg font-bold text-gray-900 dark:text-gray-100">
-            목차
-          </h2>
-          <button
-            id="mobile-toc-close"
-            class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              class="h-6 w-6"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M6 18L18 6M6 6l12 12"></path>
-            </svg>
-          </button>
-        </div>
-
-        <nav>
-          <ul class="space-y-2 text-sm">
-            {
-              headings.map((heading) => (
-                <li>
-                  <a
-                    href={`#${heading.slug}`}
-                    class="toc-link block text-gray-600 dark:text-gray-400 hover:text-brand-600 dark:hover:text-brand-400 transition-colors py-1"
-                    data-slug={heading.slug}
-                    style={{
-                      paddingLeft: `${(heading.depth - minDepth) * 1}rem`,
-                    }}
-                  >
-                    {heading.text}
-                  </a>
-                </li>
-              ))
-            }
-          </ul>
-        </nav>
-      </div>
-    </div>
-  </div>
-
   <script>
     const ACTIVE_CLASSES = [
       "!text-brand-600",
@@ -269,19 +185,11 @@ const date = new Date(post.data.published_at).toLocaleDateString("ko-KR", {
               l.classList.remove(...ACTIVE_CLASSES);
             });
 
-            // Select ALL links with this slug (Desktop + Mobile)
-            const links = document.querySelectorAll(
-              `.toc-link[data-slug="${id}"]`,
-            );
-            links.forEach((link) => {
+            const link = document.querySelector(`.toc-link[data-slug="${id}"]`);
+            if (link) {
               link.classList.add(...ACTIVE_CLASSES);
-              // Only scroll the desktop sidebar link into view if it's visible context
-              if (link.closest("aside")) {
-                link.scrollIntoView({ block: "nearest", behavior: "smooth" });
-              }
-              // For mobile, we might want to scroll it if the drawer is open,
-              // but purely adding the class is enough for visual state.
-            });
+              link.scrollIntoView({ block: "nearest", behavior: "smooth" });
+            }
           }
         });
       },
@@ -307,51 +215,6 @@ const date = new Date(post.data.published_at).toLocaleDateString("ko-KR", {
             behavior: "smooth",
           });
           history.pushState(null, "", `#${targetId}`);
-        }
-      });
-    });
-    // Mobile TOC Logic
-    const mobileTocBtn = document.getElementById("mobile-toc-btn");
-    const mobileTocOverlay = document.getElementById("mobile-toc-overlay");
-    const mobileTocDrawer = document.getElementById("mobile-toc-drawer");
-    const mobileTocClose = document.getElementById("mobile-toc-close");
-    const mobileTocLinks = document.querySelectorAll(
-      "#mobile-toc-drawer a",
-    ) as NodeListOf<HTMLAnchorElement>;
-
-    function toggleMobileToc(show: boolean) {
-      if (show) {
-        mobileTocOverlay?.classList.remove("opacity-0", "pointer-events-none");
-        mobileTocDrawer?.classList.remove("translate-x-full");
-        document.body.style.overflow = "hidden"; // Prevent background scrolling
-      } else {
-        mobileTocOverlay?.classList.add("opacity-0", "pointer-events-none");
-        mobileTocDrawer?.classList.add("translate-x-full");
-        document.body.style.overflow = "";
-      }
-    }
-
-    mobileTocBtn?.addEventListener("click", () => toggleMobileToc(true));
-    mobileTocClose?.addEventListener("click", () => toggleMobileToc(false));
-    mobileTocOverlay?.addEventListener("click", () => toggleMobileToc(false));
-
-    mobileTocLinks.forEach((link) => {
-      link.addEventListener("click", (e) => {
-        toggleMobileToc(false); // Close drawer first
-
-        // Smooth scroll logic (duplicated from desktop for safety)
-        e.preventDefault();
-        const targetId = link.getAttribute("href")?.substring(1);
-        const target = document.getElementById(targetId!);
-        if (target) {
-          // Small delay to allow drawer to close smoothy before scrolling
-          setTimeout(() => {
-            window.scrollTo({
-              top: target.offsetTop - 100,
-              behavior: "smooth",
-            });
-            history.pushState(null, "", `#${targetId}`);
-          }, 300);
         }
       });
     });
