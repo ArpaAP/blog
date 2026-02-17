@@ -1,84 +1,99 @@
 ---
-import BaseLayout from '@/layouts/BaseLayout.astro';
-import CodeBlock from '@/components/mdx/CodeBlock.astro';
-import { getCollection, render } from 'astro:content';
-import type { CollectionEntry } from 'astro:content';
-import { Image } from 'astro:assets';
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import CodeBlock from "@/components/mdx/CodeBlock.astro";
+import { getCollection, render } from "astro:content";
+import type { CollectionEntry } from "astro:content";
+import { Image } from "astro:assets";
 
 export async function getStaticPaths() {
-  const posts = await getCollection('articles');
+  const posts = await getCollection("articles");
   return posts.map((post) => ({
     params: { slug: post.id },
     props: { post },
   }));
 }
 
-
 interface Props {
-  post: CollectionEntry<'articles'>;
+  post: CollectionEntry<"articles">;
 }
 
 const { post } = Astro.props;
 const { Content, headings, remarkPluginFrontmatter } = await render(post);
-const minDepth = headings.length > 0 ? Math.min(...headings.map((h) => h.depth)) : 1;
+const minDepth =
+  headings.length > 0 ? Math.min(...headings.map((h) => h.depth)) : 1;
 const readingTime = remarkPluginFrontmatter?.minutesRead;
 
-const date = new Date(post.data.published_at).toLocaleDateString('ko-KR', {
-  weekday: 'long',
-  year: 'numeric',
-  month: 'long',
-  day: 'numeric'
+const date = new Date(post.data.published_at).toLocaleDateString("ko-KR", {
+  weekday: "long",
+  year: "numeric",
+  month: "long",
+  day: "numeric",
 });
 ---
 
-<BaseLayout title={`${post.data.title} - Devlog Alpha`} description={post.data.excerpt} transparentNavbar={!!post.data.feature_image}>
-  {post.data.feature_image ? (
-    <div slot="hero" class="relative w-full h-[60vh] min-h-[480px] flex items-center justify-center overflow-hidden bg-gray-900 mb-12">
-      <div class="absolute inset-0 z-0">
-        <Image 
-          src={post.data.feature_image} 
-          alt={post.data.feature_image_alt || post.data.title} 
-          class="w-full h-full object-cover opacity-60 blur-sm scale-105"
-        />
-        <div class="absolute inset-0 bg-black/40"></div>
-      </div>
-      
-      <div class="relative z-10 w-full max-w-4xl mx-auto px-6 text-center">
-        <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold text-white tracking-tight leading-tight drop-shadow-lg mt-8 mb-12">
-          {post.data.title}
-        </h1>
+<BaseLayout
+  title={`${post.data.title} - Devlog Alpha`}
+  description={post.data.excerpt}
+  transparentNavbar={!!post.data.feature_image}
+>
+  {
+    post.data.feature_image ? (
+      <div
+        slot="hero"
+        class="relative w-full h-[60vh] min-h-[480px] flex items-center justify-center overflow-hidden bg-gray-900 mb-12"
+      >
+        <div class="absolute inset-0 z-0">
+          <Image
+            src={post.data.feature_image}
+            alt={post.data.feature_image_alt || post.data.title}
+            class="w-full h-full object-cover opacity-60 blur-sm scale-105"
+          />
+          <div class="absolute inset-0 bg-black/40" />
+        </div>
 
-        <div class="flex flex-col items-center justify-center gap-2 text-sm font-medium text-gray-200">
-          {post.data.tags && post.data.tags.length > 0 && (
-            <div class="flex flex-wrap items-center justify-center gap-2 mb-1">
-              {post.data.tags.map((tag) => (
-                <span class="text-brand-300 text-base">#{tag}</span>
-              ))}
-            </div>
-          )}
-          <div class="flex items-center gap-3">
-            <time datetime={post.data.published_at.toISOString()}>{date}</time>
-            {readingTime && (
-              <>
-                <span class="text-gray-400">&bull;</span>
-                <span class="text-gray-300">{readingTime}</span>
-              </>
+        <div class="relative z-10 w-full max-w-4xl mx-auto px-6 text-center">
+          <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold text-white tracking-tight leading-tight drop-shadow-lg mt-8 mb-12">
+            {post.data.title}
+          </h1>
+
+          <div class="flex flex-col items-center justify-center gap-2 text-sm font-medium text-gray-200">
+            {post.data.tags && post.data.tags.length > 0 && (
+              <div class="flex flex-wrap items-center justify-center gap-2 mb-1">
+                {post.data.tags.map((tag) => (
+                  <span class="text-brand-300 text-base">#{tag}</span>
+                ))}
+              </div>
             )}
+            <div class="flex items-center gap-3">
+              <time datetime={post.data.published_at.toISOString()}>
+                {date}
+              </time>
+              {readingTime && (
+                <>
+                  <span class="text-gray-400">&bull;</span>
+                  <span class="text-gray-300">{readingTime}</span>
+                </>
+              )}
+            </div>
           </div>
         </div>
       </div>
-    </div>
-  ) : null}
+    ) : null
+  }
 
   <div class="max-w-7xl mx-auto flex flex-col lg:flex-row gap-12">
     <article class="w-full lg:w-[80%] min-w-0">
       <div class="mb-8">
-        <a href="/articles" class="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-brand-600 transition-colors">
+        <a
+          href="/articles"
+          class="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-brand-600 transition-colors"
+        >
           &larr; 목록으로
         </a>
       </div>
 
-      {!post.data.feature_image && (
+      {
+        !post.data.feature_image && (
           <header class="mb-12 border-b border-gray-200 dark:border-gray-700 pb-10">
             <h1 class="text-4xl md:text-5xl font-bold text-gray-900 dark:text-gray-100 leading-tight mb-4">
               {post.data.title}
@@ -86,12 +101,16 @@ const date = new Date(post.data.published_at).toLocaleDateString('ko-KR', {
 
             <div class="flex flex-col gap-2 text-sm text-gray-500">
               <div class="flex items-center gap-2">
-                {post.data.tags.map(tag => (
-                  <span class="text-brand-600 dark:text-brand-300 font-medium text-base">#{tag}</span>
+                {post.data.tags.map((tag) => (
+                  <span class="text-brand-600 dark:text-brand-300 font-medium text-base">
+                    #{tag}
+                  </span>
                 ))}
               </div>
               <div class="flex items-center gap-2">
-                <time datetime={post.data.published_at.toISOString()}>{date}</time>
+                <time datetime={post.data.published_at.toISOString()}>
+                  {date}
+                </time>
                 {readingTime && (
                   <>
                     <span>&bull;</span>
@@ -101,9 +120,12 @@ const date = new Date(post.data.published_at).toLocaleDateString('ko-KR', {
               </div>
             </div>
           </header>
-      )}
+        )
+      }
 
-      <div class="prose prose-h1:text-[32px] prose-pre:my-0 prose-slate dark:prose-invert prose-headings:font-bold prose-headings:tracking-tight prose-a:text-brand-600 dark:prose-a:text-brand-300 max-w-none">
+      <div
+        class="prose prose-h1:text-[32px] prose-pre:my-0 prose-slate dark:prose-invert prose-headings:font-bold prose-headings:tracking-tight prose-a:text-brand-600 dark:prose-a:text-brand-300 max-w-none"
+      >
         <Content components={{ pre: CodeBlock }} />
       </div>
 
@@ -112,67 +134,226 @@ const date = new Date(post.data.published_at).toLocaleDateString('ko-KR', {
 
     <aside class="hidden lg:block w-[20%] shrink-0">
       <div class="sticky top-24 pt-4">
-        <h2 class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">On this page</h2>
-        <nav class="max-h-[calc(100vh-10rem)] overflow-y-auto pr-2 scrollbar-hide">
-          <ul class="space-y-1 text-sm border-l-2 border-transparent hover:border-gray-200 dark:hover:border-neutral-800 transition-colors duration-200">
-
-            {headings.map((heading) => (
-              <li>
-                <a
-                  href={`#${heading.slug}`}
-                  class="toc-link block py-1 -ml-[2px] text-gray-500 hover:text-gray-900 dark:text-neutral-500 dark:hover:text-neutral-300 transition-all duration-200 border-l-2 border-transparent hover:border-gray-300"
-                  data-slug={heading.slug}
-                  style={{ paddingLeft: `${1 + (heading.depth - minDepth) * 0.75}rem` }}
-                >
-                  {heading.text}
-                </a>
-              </li>
-            ))}
+        <h2
+          class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4"
+        >
+          On this page
+        </h2>
+        <nav
+          class="max-h-[calc(100vh-10rem)] overflow-y-auto pr-2 scrollbar-hide"
+        >
+          <ul
+            class="space-y-1 text-sm border-l-2 border-transparent hover:border-gray-200 dark:hover:border-neutral-800 transition-colors duration-200"
+          >
+            {
+              headings.map((heading) => (
+                <li>
+                  <a
+                    href={`#${heading.slug}`}
+                    class="toc-link block py-1 -ml-[2px] text-gray-500 hover:text-gray-900 dark:text-neutral-500 dark:hover:text-neutral-300 transition-all duration-200 border-l-2 border-transparent hover:border-gray-300"
+                    data-slug={heading.slug}
+                    style={{
+                      paddingLeft: `${1 + (heading.depth - minDepth) * 0.75}rem`,
+                    }}
+                  >
+                    {heading.text}
+                  </a>
+                </li>
+              ))
+            }
           </ul>
         </nav>
       </div>
     </aside>
   </div>
 
-  <script>
-    const ACTIVE_CLASSES = ['!text-brand-600', 'dark:!text-brand-300', '!font-bold', '!border-brand-600', 'dark:!border-brand-300'];
+  <!-- Mobile Table of Contents FAB & Drawer -->
+  <div class="lg:hidden">
+    <!-- FAB Button -->
+    <button
+      id="mobile-toc-btn"
+      class="fixed bottom-8 right-8 z-40 bg-white dark:bg-neutral-800 text-gray-800 dark:text-gray-200 border border-gray-200 dark:border-neutral-700 shadow-xl rounded-full p-4 hover:scale-105 active:scale-95 transition-all duration-200"
+      aria-label="Table of Contents"
+    >
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        class="h-6 w-6"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M4 6h16M4 12h16m-7 6h7"></path>
+      </svg>
+    </button>
 
-      const observer = new IntersectionObserver((entries) => {
+    <!-- Drawer Overlay -->
+    <div
+      id="mobile-toc-overlay"
+      class="fixed inset-0 bg-black/50 z-50 opacity-0 pointer-events-none transition-opacity duration-300"
+    >
+    </div>
+
+    <!-- Drawer Content -->
+    <div
+      id="mobile-toc-drawer"
+      class="fixed top-0 right-0 h-full w-[280px] bg-white dark:bg-neutral-900 shadow-2xl z-50 transform translate-x-full transition-transform duration-300 ease-in-out overflow-y-auto"
+    >
+      <div class="p-6">
+        <div class="flex justify-between items-center mb-6">
+          <h2 class="text-lg font-bold text-gray-900 dark:text-gray-100">
+            목차
+          </h2>
+          <button
+            id="mobile-toc-close"
+            class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="h-6 w-6"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+          </button>
+        </div>
+
+        <nav>
+          <ul class="space-y-2 text-sm">
+            {
+              headings.map((heading) => (
+                <li>
+                  <a
+                    href={`#${heading.slug}`}
+                    class="toc-link block text-gray-600 dark:text-gray-400 hover:text-brand-600 dark:hover:text-brand-400 transition-colors py-1"
+                    data-slug={heading.slug}
+                    style={{
+                      paddingLeft: `${(heading.depth - minDepth) * 1}rem`,
+                    }}
+                  >
+                    {heading.text}
+                  </a>
+                </li>
+              ))
+            }
+          </ul>
+        </nav>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const ACTIVE_CLASSES = [
+      "!text-brand-600",
+      "dark:!text-brand-300",
+      "!font-bold",
+      "!border-brand-600",
+      "dark:!border-brand-300",
+    ];
+
+    const observer = new IntersectionObserver(
+      (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
-            const id = entry.target.getAttribute('id');
-            document.querySelectorAll('.toc-link').forEach((l) => {
+            const id = entry.target.getAttribute("id");
+            document.querySelectorAll(".toc-link").forEach((l) => {
               l.classList.remove(...ACTIVE_CLASSES);
             });
 
-            const link = document.querySelector(`.toc-link[data-slug="${id}"]`);
-            if (link) {
+            // Select ALL links with this slug (Desktop + Mobile)
+            const links = document.querySelectorAll(
+              `.toc-link[data-slug="${id}"]`,
+            );
+            links.forEach((link) => {
               link.classList.add(...ACTIVE_CLASSES);
-              link.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
-            }
+              // Only scroll the desktop sidebar link into view if it's visible context
+              if (link.closest("aside")) {
+                link.scrollIntoView({ block: "nearest", behavior: "smooth" });
+              }
+              // For mobile, we might want to scroll it if the drawer is open,
+              // but purely adding the class is enough for visual state.
+            });
           }
         });
-      }, {
-        rootMargin: '-100px 0px -66% 0px'
-      });
+      },
+      {
+        rootMargin: "-100px 0px -66% 0px",
+      },
+    );
 
-      document.querySelectorAll('.prose h1, .prose h2, .prose h3, .prose h4').forEach((heading) => {
+    document
+      .querySelectorAll(".prose h1, .prose h2, .prose h3, .prose h4")
+      .forEach((heading) => {
         observer.observe(heading);
       });
 
-      document.querySelectorAll('.toc-link').forEach(link => {
-        link.addEventListener('click', (e) => {
-          e.preventDefault();
-          const targetId = link.getAttribute('href')?.substring(1);
-          const target = document.getElementById(targetId!);
-          if (target) {
+    document.querySelectorAll(".toc-link").forEach((link) => {
+      link.addEventListener("click", (e) => {
+        e.preventDefault();
+        const targetId = link.getAttribute("href")?.substring(1);
+        const target = document.getElementById(targetId!);
+        if (target) {
+          window.scrollTo({
+            top: target.offsetTop - 100,
+            behavior: "smooth",
+          });
+          history.pushState(null, "", `#${targetId}`);
+        }
+      });
+    });
+    // Mobile TOC Logic
+    const mobileTocBtn = document.getElementById("mobile-toc-btn");
+    const mobileTocOverlay = document.getElementById("mobile-toc-overlay");
+    const mobileTocDrawer = document.getElementById("mobile-toc-drawer");
+    const mobileTocClose = document.getElementById("mobile-toc-close");
+    const mobileTocLinks = document.querySelectorAll(
+      "#mobile-toc-drawer a",
+    ) as NodeListOf<HTMLAnchorElement>;
+
+    function toggleMobileToc(show: boolean) {
+      if (show) {
+        mobileTocOverlay?.classList.remove("opacity-0", "pointer-events-none");
+        mobileTocDrawer?.classList.remove("translate-x-full");
+        document.body.style.overflow = "hidden"; // Prevent background scrolling
+      } else {
+        mobileTocOverlay?.classList.add("opacity-0", "pointer-events-none");
+        mobileTocDrawer?.classList.add("translate-x-full");
+        document.body.style.overflow = "";
+      }
+    }
+
+    mobileTocBtn?.addEventListener("click", () => toggleMobileToc(true));
+    mobileTocClose?.addEventListener("click", () => toggleMobileToc(false));
+    mobileTocOverlay?.addEventListener("click", () => toggleMobileToc(false));
+
+    mobileTocLinks.forEach((link) => {
+      link.addEventListener("click", (e) => {
+        toggleMobileToc(false); // Close drawer first
+
+        // Smooth scroll logic (duplicated from desktop for safety)
+        e.preventDefault();
+        const targetId = link.getAttribute("href")?.substring(1);
+        const target = document.getElementById(targetId!);
+        if (target) {
+          // Small delay to allow drawer to close smoothy before scrolling
+          setTimeout(() => {
             window.scrollTo({
               top: target.offsetTop - 100,
-              behavior: 'smooth'
+              behavior: "smooth",
             });
-            history.pushState(null, '', `#${targetId}`);
-          }
-        });
+            history.pushState(null, "", `#${targetId}`);
+          }, 300);
+        }
       });
+    });
   </script>
 </BaseLayout>

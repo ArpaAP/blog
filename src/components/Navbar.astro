@@ -1,75 +1,132 @@
 ---
-import { links } from '@/data/navlinks';
+import { links } from "@/data/navlinks";
 
 const { pathname } = Astro.url;
 const { isTransparent = false } = Astro.props;
 
-import '@fontsource/dancing-script';
+import "@fontsource/dancing-script";
 
 // Base classes always applied
 // Base classes for the outer nav element (positioning, z-index, transition)
 const navBaseClass = "w-full transition-all duration-300 z-50";
 
 // Inner container for centering content
-const innerContainerClass = "max-w-5xl mx-auto px-6 py-4 flex justify-between items-center";
+const innerContainerClass =
+  "max-w-5xl mx-auto px-6 py-4 flex justify-between items-center";
 ---
 
-<nav 
+<nav
   id="navbar"
-  data-transparent={isTransparent.toString()} 
-  class:list={[ navBaseClass ]}
+  data-transparent={isTransparent.toString()}
+  class:list={[navBaseClass]}
 >
   <div class={innerContainerClass}>
-    <a href="/" id="nav-logo" class="flex items-center gap-3 text-3xl transition-colors" style="font-family: 'Dancing Script', cursive;">
+    <a
+      href="/"
+      id="nav-logo"
+      class="flex items-center gap-3 text-3xl transition-colors"
+      style="font-family: 'Dancing Script', cursive;"
+    >
       devlog alpha
     </a>
-    
-    <div class="flex items-center gap-8">
-      {links.map((link) => {
-        const isActive = link.href === '/' ? pathname === '/' : pathname.startsWith(link.href);
-        return (
-          <a 
-            href={link.href}
-            target={link.newTab ? '_blank' : '_self'}
-            rel={link.newTab ? 'noopener noreferrer' : undefined}
-            class:list={[
-              "nav-link text-sm tracking-wide transition-colors duration-200 font-medium",
-              isActive ? "active font-bold" : "font-medium"
-            ]}
-          >
-            {link.newTab ? (
-              <span class="flex items-center gap-1">
-                {link.name}
-                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
-                </svg>
-              </span>
-            ) : (
-              link.name
-            )}
-          </a>
-        );
-      })}
+
+    <!-- Mobile Menu Button -->
+    <button
+      id="menu-toggle"
+      class="md:hidden focus:outline-none"
+      aria-label="Toggle menu"
+    >
+      <svg
+        class="w-6 h-6 text-gray-900 dark:text-gray-100"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M4 6h16M4 12h16M4 18h16"></path>
+      </svg>
+    </button>
+
+    <!-- Nav Links Container -->
+    <div
+      id="nav-links"
+      class="mobile-menu absolute top-full left-0 w-full flex flex-col items-start gap-4 p-6 bg-white dark:bg-neutral-950 border-b border-gray-100 dark:border-neutral-800 shadow-xl md:shadow-none md:static md:w-auto md:flex-row md:bg-transparent md:border-none md:p-0 md:gap-8"
+    >
+      {
+        links.map((link) => {
+          const isActive =
+            link.href === "/"
+              ? pathname === "/"
+              : pathname.startsWith(link.href);
+          return (
+            <a
+              href={link.href}
+              target={link.newTab ? "_blank" : "_self"}
+              rel={link.newTab ? "noopener noreferrer" : undefined}
+              class:list={[
+                "nav-link text-base md:text-sm tracking-wide transition-colors duration-200 font-medium w-full md:w-auto",
+                isActive ? "active font-bold" : "font-medium",
+              ]}
+            >
+              {link.newTab ? (
+                <span class="flex items-center gap-1">
+                  {link.name}
+                  <svg
+                    class="w-3 h-3"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                    />
+                  </svg>
+                </span>
+              ) : (
+                link.name
+              )}
+            </a>
+          );
+        })
+      }
     </div>
   </div>
 </nav>
 
 <script>
-  const navbar = document.getElementById('navbar');
-  const isTransparentPage = navbar?.dataset.transparent === 'true';
+  const navbar = document.getElementById("navbar");
+  const menuToggle = document.getElementById("menu-toggle");
+  const navLinks = document.getElementById("nav-links");
+  const isTransparentPage = navbar?.dataset.transparent === "true";
+
+  // Toggle Menu Logic
+  menuToggle?.addEventListener("click", () => {
+    const isExpanded = navLinks?.classList.contains("open");
+    if (isExpanded) {
+      navLinks?.classList.remove("open");
+    } else {
+      navLinks?.classList.add("open");
+    }
+  });
 
   if (isTransparentPage && navbar) {
     const handleScroll = () => {
       const scrollY = window.scrollY;
       // Toggle 'scrolled' state when passing 200px
       if (scrollY > 480 - 70) {
-        navbar.dataset.scrolled = 'true';
+        navbar.dataset.scrolled = "true";
       } else {
-        navbar.dataset.scrolled = 'false';
+        navbar.dataset.scrolled = "false";
       }
     };
 
-    window.addEventListener('scroll', handleScroll, { passive: true });
+    window.addEventListener("scroll", handleScroll, { passive: true });
     // Initial check
     handleScroll();
   }
@@ -77,35 +134,58 @@ const innerContainerClass = "max-w-5xl mx-auto px-6 py-4 flex justify-between it
 
 <style>
   @reference "../styles/global.css";
-  
+
   /* Default State (Standard Pages) */
   nav {
     @apply bg-white/90 dark:bg-neutral-950/90 backdrop-blur-sm sticky top-0 border-b border-gray-100 dark:border-neutral-800;
   }
-  
+
   #nav-logo {
     @apply text-gray-900 dark:text-neutral-100;
   }
-  
+
   .nav-link {
     @apply text-gray-500 dark:text-neutral-400 hover:text-brand-600 dark:hover:text-brand-400;
   }
-  
+
   .nav-link.active {
     @apply text-brand-600 dark:text-brand-400;
+  }
+
+  /* Mobile Menu Animation */
+  .mobile-menu {
+    /* Hidden state by default on mobile */
+    @apply opacity-0 invisible -translate-y-2 transition-all duration-300 ease-out;
+  }
+
+  /* Visible state when 'open' class is added */
+  .mobile-menu.open {
+    @apply opacity-100 visible translate-y-0;
+  }
+
+  /* Always visible on desktop */
+  @media (min-width: 768px) {
+    .mobile-menu {
+      @apply opacity-100 visible translate-y-0 transition-none;
+    }
   }
 
   /* Transparent Page State */
   nav[data-transparent="true"] {
     @apply fixed top-0 left-0 right-0 border-transparent bg-transparent bg-none backdrop-blur-none border-b-0;
   }
-  
+
   /* Initial Transparent State (Top) */
   nav[data-transparent="true"]:not([data-scrolled="true"]) #nav-logo {
     @apply text-white hover:text-white/80;
   }
-  
+
   nav[data-transparent="true"]:not([data-scrolled="true"]) .nav-link.active {
+    @apply text-white;
+  }
+
+  /* Handle mobile toggle button color on transparent header */
+  nav[data-transparent="true"]:not([data-scrolled="true"]) #menu-toggle svg {
     @apply text-white;
   }
 
@@ -113,16 +193,20 @@ const innerContainerClass = "max-w-5xl mx-auto px-6 py-4 flex justify-between it
   nav[data-transparent="true"][data-scrolled="true"] {
     @apply bg-white/90 dark:bg-neutral-950/90 backdrop-blur-sm border-b border-gray-100 dark:border-neutral-800;
   }
-  
+
   nav[data-transparent="true"][data-scrolled="true"] #nav-logo {
     @apply text-gray-900 dark:text-neutral-100;
   }
-  
+
   nav[data-transparent="true"][data-scrolled="true"] .nav-link {
     @apply text-gray-500 dark:text-neutral-400 hover:text-brand-600 dark:hover:text-brand-400;
   }
-  
+
   nav[data-transparent="true"][data-scrolled="true"] .nav-link.active {
     @apply text-brand-600 dark:text-brand-400;
+  }
+
+  nav[data-transparent="true"][data-scrolled="true"] #menu-toggle svg {
+    @apply text-gray-900 dark:text-neutral-100;
   }
 </style>
