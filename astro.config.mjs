@@ -5,6 +5,8 @@ import { remarkReadingTime } from "./src/utils/reading-time.mjs";
 import keystatic from "@keystatic/astro";
 
 import react from "@astrojs/react";
+import remarkMath from "remark-math";
+import rehypeKatex from "rehype-katex";
 import rehypeExternalLinks from "rehype-external-links";
 
 // https://astro.build/config
@@ -15,11 +17,18 @@ export default defineConfig({
   integrations: [
     react(),
     mdx({
-      remarkPlugins: [remarkReadingTime],
+      remarkPlugins: [remarkReadingTime, remarkMath],
+      rehypePlugins: [rehypeKatex],
     }),
     process.env.NODE_ENV === "development" ? keystatic() : null,
   ].filter(Boolean),
   markdown: {
+    shikiConfig: {
+      themes: {
+        light: "github-light",
+        dark: "github-dark",
+      },
+    },
     rehypePlugins: [
       [
         rehypeExternalLinks,

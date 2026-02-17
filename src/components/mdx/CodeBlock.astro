@@ -1,0 +1,82 @@
+---
+const props = Astro.props;
+
+// Map common language identifiers to display names
+const languageMap: Record<string, string> = {
+  js: 'JavaScript',
+  ts: 'TypeScript',
+  py: 'Python',
+  python: 'Python',
+  rb: 'Ruby',
+  go: 'Go',
+  rs: 'Rust',
+  java: 'Java',
+  c: 'C',
+  cpp: 'C++',
+  cs: 'C#',
+  html: 'HTML',
+  css: 'CSS',
+  json: 'JSON',
+  sh: 'Shell',
+  bash: 'Bash',
+  yml: 'YAML',
+  yaml: 'YAML',
+  md: 'Markdown',
+  mdx: 'MDX',
+};
+
+const langCode = props['data-language'] || 'text';
+const language = languageMap[langCode] || langCode;
+---
+
+<div class="code-block-wrapper my-6 rounded-lg overflow-hidden bg-white dark:bg-[#24292e] shadow-sm dark:shadow-lg border border-gray-200 dark:border-gray-700/50">
+  <div class="flex items-center justify-between px-4 py-2 bg-gray-50 dark:bg-[#24292e] border-b border-gray-200 dark:border-gray-700/50 text-gray-500 dark:text-gray-400">
+    <div class="flex items-center gap-2">
+      <!-- Mac-like window buttons (optional decoration) -->
+      <!-- <div class="flex gap-1.5 mr-2">
+        <div class="w-2.5 h-2.5 rounded-full bg-red-500/80"></div>
+        <div class="w-2.5 h-2.5 rounded-full bg-yellow-500/80"></div>
+        <div class="w-2.5 h-2.5 rounded-full bg-green-500/80"></div>
+      </div> -->
+      <span class="text-xs font-mono font-medium text-gray-600 dark:text-gray-300">{language}</span>
+    </div>
+    <button
+      class="copy-button p-1.5 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700/50 text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white transition-colors"
+      aria-label="Copy code"
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="copy-icon"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="check-icon hidden text-green-400"><polyline points="20 6 9 17 4 12"/></svg>
+    </button>
+  </div>
+  <div class="relative">
+    <pre {...props} class={`my-0! p-4! bg-transparent! rounded-none! overflow-x-auto text-sm ${props.class || ''}`}><slot /></pre>
+  </div>
+</div>
+
+<script>
+  document.querySelectorAll('.code-block-wrapper').forEach(wrapper => {
+    const button = wrapper.querySelector('.copy-button');
+    const pre = wrapper.querySelector('pre');
+    const copyIcon = button?.querySelector('.copy-icon');
+    const checkIcon = button?.querySelector('.check-icon');
+
+    if (button && pre) {
+      button.addEventListener('click', async () => {
+        const code = pre.textContent || '';
+        try {
+          await navigator.clipboard.writeText(code);
+          
+          copyIcon?.classList.add('hidden');
+          checkIcon?.classList.remove('hidden');
+
+          setTimeout(() => {
+            copyIcon?.classList.remove('hidden');
+            checkIcon?.classList.add('hidden');
+          }, 2000);
+        } catch (err) {
+          console.error('Failed to copy code:', err);
+        }
+      });
+    }
+  });
+</script>

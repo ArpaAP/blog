@@ -1,5 +1,6 @@
 ---
 import BaseLayout from '@/layouts/BaseLayout.astro';
+import CodeBlock from '@/components/mdx/CodeBlock.astro';
 import { getCollection, render } from 'astro:content';
 import type { CollectionEntry } from 'astro:content';
 
@@ -100,8 +101,8 @@ const date = new Date(post.data.published_at).toLocaleDateString('ko-KR', {
           </header>
       )}
 
-      <div class="prose prose-h1:text-[32px] prose-slate dark:prose-invert prose-headings:font-bold prose-headings:tracking-tight prose-a:text-brand-600 dark:prose-a:text-brand-300 max-w-none">
-        <Content />
+      <div class="prose prose-h1:text-[32px] prose-pre:my-0 prose-slate dark:prose-invert prose-headings:font-bold prose-headings:tracking-tight prose-a:text-brand-600 dark:prose-a:text-brand-300 max-w-none">
+        <Content components={{ pre: CodeBlock }} />
       </div>
 
       {/* Optional: Add Author Bio or Next/Prev links here */}
