@@ -1,6 +1,7 @@
 import { defineConfig } from "astro/config";
 import tailwindcss from "@tailwindcss/vite";
 import mdx from "@astrojs/mdx";
+import sitemap from "@astrojs/sitemap";
 import { remarkReadingTime } from "./src/utils/reading-time.mjs";
 import keystatic from "@keystatic/astro";
 
@@ -11,10 +12,12 @@ import rehypeExternalLinks from "rehype-external-links";
 
 // https://astro.build/config
 export default defineConfig({
+  site: "https://arpaap.dev",
   vite: {
     plugins: [tailwindcss()],
   },
   integrations: [
+    sitemap(),
     react(),
     mdx({
       remarkPlugins: [remarkReadingTime, remarkMath],

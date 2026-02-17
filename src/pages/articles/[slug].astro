@@ -19,6 +19,9 @@ interface Props {
 
 const { post } = Astro.props;
 const { Content, headings, remarkPluginFrontmatter } = await render(post);
+const ogImage = post.data.feature_image
+  ? new URL(post.data.feature_image.src, Astro.site).href
+  : undefined;
 const minDepth =
   headings.length > 0 ? Math.min(...headings.map((h) => h.depth)) : 1;
 const readingTime = remarkPluginFrontmatter?.minutesRead;
@@ -29,13 +32,37 @@ const date = new Date(post.data.published_at).toLocaleDateString("ko-KR", {
   month: "long",
   day: "numeric",
 });
+
+const articleUrl = new URL(`/articles/${post.id}`, Astro.site).href;
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  headline: post.data.title,
+  ...(post.data.excerpt && { description: post.data.excerpt }),
+  datePublished: post.data.published_at.toISOString(),
+  url: articleUrl,
+  ...(ogImage && { image: ogImage }),
+  author: {
+    "@type": "Person",
+    name: "Buyeon Hwang",
+    url: "https://arpaap.dev",
+  },
+  publisher: {
+    "@type": "Person",
+    name: "Buyeon Hwang",
+    url: "https://arpaap.dev",
+  },
+};
 ---
 
 <BaseLayout
   title={`${post.data.title} - Devlog Alpha`}
   description={post.data.excerpt}
   transparentNavbar={!!post.data.feature_image}
+  ogImage={ogImage}
+  ogType="article"
 >
+  <script slot="head" is:inline type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
   {
     post.data.feature_image ? (
       <div
