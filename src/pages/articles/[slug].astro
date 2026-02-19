@@ -1,6 +1,7 @@
 ---
 import BaseLayout from "@/layouts/BaseLayout.astro";
 import CodeBlock from "@/components/mdx/CodeBlock.astro";
+import GiscusComments from "@/components/GiscusComments.astro";
 import { getCollection, render } from "astro:content";
 import type { CollectionEntry } from "astro:content";
 import { Image } from "astro:assets";
@@ -156,7 +157,7 @@ const jsonLd = {
         <Content components={{ pre: CodeBlock }} />
       </div>
 
-      {/* Optional: Add Author Bio or Next/Prev links here */}
+      <GiscusComments />
     </article>
 
     <aside class="hidden lg:block w-[20%] shrink-0">

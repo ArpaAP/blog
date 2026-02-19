@@ -1,0 +1,61 @@
+<section
+  id="comments"
+  class="mt-16 pt-10 border-t border-gray-200 dark:border-gray-700"
+>
+  <h2 class="text-xl font-bold text-gray-900 dark:text-gray-100 mb-8">댓글</h2>
+
+  <div id="giscus-container">
+    <script
+      is:inline
+      src="https://giscus.app/client.js"
+      data-repo="arpaap/blog"
+      data-repo-id="R_kgDOROHilQ"
+      data-category="Announcements"
+      data-category-id="DIC_kwDOROHilc4C2yND"
+      data-mapping="pathname"
+      data-strict="0"
+      data-reactions-enabled="1"
+      data-emit-metadata="0"
+      data-input-position="top"
+      data-theme="light"
+      data-lang="ko"
+      data-loading="lazy"
+      crossorigin="anonymous"
+      async></script>
+  </div>
+</section>
+
+<script is:inline>
+  function getGiscusTheme() {
+    return document.documentElement.classList.contains("dark")
+      ? "dark"
+      : "light";
+  }
+
+  function sendGiscusTheme(theme) {
+    const iframe = document.querySelector("iframe.giscus-frame");
+    if (!iframe) return;
+    iframe.contentWindow.postMessage(
+      { giscus: { setConfig: { theme } } },
+      "https://giscus.app",
+    );
+  }
+
+  // 초기 로드 시 테마 적용 (iframe이 로드된 후 실행)
+  window.addEventListener("message", function onGiscusLoad(event) {
+    if (event.origin !== "https://giscus.app") return;
+    if (event.data?.giscus?.discussion !== undefined) return; // 댓글 이벤트 무시
+    sendGiscusTheme(getGiscusTheme());
+    window.removeEventListener("message", onGiscusLoad);
+  });
+
+  // 다크모드 토글 감지 → Giscus 테마 실시간 업데이트
+  const observer = new MutationObserver(() => {
+    sendGiscusTheme(getGiscusTheme());
+  });
+
+  observer.observe(document.documentElement, {
+    attributes: true,
+    attributeFilter: ["class"],
+  });
+</script>
