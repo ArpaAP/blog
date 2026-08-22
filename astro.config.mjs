@@ -9,6 +9,7 @@ import react from "@astrojs/react";
 import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
 import rehypeExternalLinks from "rehype-external-links";
+import { unified } from "@astrojs/markdown-remark";
 
 // https://astro.build/config
 export default defineConfig({
@@ -19,7 +20,11 @@ export default defineConfig({
   integrations: [
     sitemap(),
     react(),
-    mdx({
+    mdx(),
+    process.env.NODE_ENV === "development" ? keystatic() : null,
+  ].filter(Boolean),
+  markdown: {
+    processor: unified({
       remarkPlugins: [remarkReadingTime, remarkMath],
       rehypePlugins: [
         rehypeKatex,
@@ -87,9 +92,6 @@ export default defineConfig({
         ],
       ],
     }),
-    process.env.NODE_ENV === "development" ? keystatic() : null,
-  ].filter(Boolean),
-  markdown: {
     shikiConfig: {
       themes: {
         light: "one-light",

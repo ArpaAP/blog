@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Personal developer blog and portfolio for Buyeon Hwang ("Devlog Alpha"). Built with Astro 5 as a static site (SSG) using MDX for article content.
+Personal developer blog and portfolio for Buyeon Hwang ("Devlog Alpha"). Built with Astro 7 as a static site (SSG) using MDX for article content.
 
 ## Commands
 
@@ -16,7 +16,7 @@ Package manager: **pnpm**
 
 ## Architecture
 
-- **Framework**: Astro 5 with MDX integration, Tailwind CSS v4 (via Vite plugin)
+- **Framework**: Astro 7 with MDX integration, Tailwind CSS v4 (via Vite plugin)
 - **Output**: Static site generation (no SSR)
 - **Language**: Korean (`lang="ko"`), uses Pretendard Variable font
 
