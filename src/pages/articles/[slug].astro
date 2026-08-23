@@ -1,6 +1,7 @@
 ---
 import BaseLayout from "@/layouts/BaseLayout.astro";
 import CodeBlock from "@/components/mdx/CodeBlock.astro";
+import Callout from "@/components/mdx/Callout.astro";
 import GiscusComments from "@/components/GiscusComments.astro";
 import { getCollection, render } from "astro:content";
 import type { CollectionEntry } from "astro:content";
@@ -154,7 +155,7 @@ const jsonLd = {
       <div
         class="prose prose-h1:text-[32px] prose-pre:my-0 prose-slate dark:prose-invert prose-headings:font-bold prose-headings:tracking-tight prose-a:text-brand-600 dark:prose-a:text-brand-300 max-w-none"
       >
-        <Content components={{ pre: CodeBlock }} />
+        <Content components={{ pre: CodeBlock, Callout }} />
       </div>
 
       <GiscusComments />
