@@ -2,6 +2,7 @@
 import '@/styles/global.css';
 
 import Navbar from '@/components/Navbar.astro';
+import SearchModal from '@/components/SearchModal.astro';
 import ThemeToggle from '@/components/ThemeToggle.astro';
 
 
@@ -85,6 +86,7 @@ const GA_ID = import.meta.env.PUBLIC_GA_ID;
 	</head>
 	<body class="min-h-screen flex flex-col bg-background dark:bg-neutral-950 text-gray-900 dark:text-neutral-100 antialiased selection:bg-brand-100 dark:selection:bg-brand-900 selection:text-brand-900 dark:selection:text-brand-100 transition-colors duration-200">
     <Navbar isTransparent={transparentNavbar} />
+    <SearchModal />
     
     <slot name="hero" />
     

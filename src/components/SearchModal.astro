@@ -1,0 +1,320 @@
+<dialog
+  id="search-modal"
+  aria-labelledby="search-modal-title"
+  class="m-auto w-[min(42rem,calc(100%-2rem))] max-h-[min(42rem,calc(100dvh-2rem))] overflow-hidden rounded-2xl border border-gray-200 bg-white p-0 text-gray-900 shadow-2xl backdrop:bg-gray-950/60 backdrop:backdrop-blur-sm dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100"
+>
+  <section class="flex max-h-[min(42rem,calc(100dvh-2rem))] flex-col">
+    <h2 id="search-modal-title" class="sr-only">블로그 검색</h2>
+
+    <div class="flex items-center gap-3 border-b border-gray-100 px-4 dark:border-neutral-800">
+      <svg
+        aria-hidden="true"
+        class="size-5 shrink-0 text-gray-400"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <circle cx="11" cy="11" r="8"></circle>
+        <path d="m21 21-4.35-4.35"></path>
+      </svg>
+      <input
+        id="search-input"
+        type="search"
+        autocomplete="off"
+        spellcheck="false"
+        placeholder="검색어를 입력하세요"
+        aria-controls="search-results"
+        aria-describedby="search-status"
+        class="min-w-0 grow bg-transparent py-4 text-base outline-none placeholder:text-gray-400"
+      />
+      <button
+        id="search-close"
+        type="button"
+        aria-label="검색 닫기"
+        class="rounded-md border border-gray-200 px-2 py-1 text-xs text-gray-500 transition-colors hover:bg-gray-100 dark:border-neutral-700 dark:text-neutral-400 dark:hover:bg-neutral-800"
+      >
+        ESC
+      </button>
+    </div>
+
+    <div class="min-h-48 overflow-y-auto p-2 sm:min-h-64">
+      <p
+        id="search-status"
+        role="status"
+        aria-live="polite"
+        class="px-3 py-12 text-center text-sm text-gray-500 dark:text-neutral-400"
+      >
+        제목, 본문, 태그를 검색할 수 있어요.
+      </p>
+      <ol id="search-results" class="hidden" aria-label="검색 결과"></ol>
+    </div>
+
+    <div class="hidden items-center justify-between border-t border-gray-100 px-4 py-2 text-xs text-gray-400 sm:flex dark:border-neutral-800 dark:text-neutral-500">
+      <span>↑↓ 이동 · Enter 선택</span>
+      <span>Pagefind 검색</span>
+    </div>
+  </section>
+</dialog>
+
+<script>
+  type PagefindResultData = {
+    url: string;
+    excerpt: string;
+    meta: Record<string, string>;
+  };
+
+  type PagefindResult = {
+    data: () => Promise<PagefindResultData>;
+  };
+
+  type PagefindModule = {
+    options: (options: { excerptLength: number }) => Promise<void>;
+    search: (query: string) => Promise<{ results: PagefindResult[] }>;
+  };
+
+  const dialog = document.querySelector<HTMLDialogElement>("#search-modal");
+  const input = document.querySelector<HTMLInputElement>("#search-input");
+  const closeButton = document.querySelector<HTMLButtonElement>("#search-close");
+  const status = document.querySelector<HTMLElement>("#search-status");
+  const results = document.querySelector<HTMLOListElement>("#search-results");
+
+  let pagefindPromise: Promise<PagefindModule> | undefined;
+  let debounceTimer: number | undefined;
+  let closeTimer: number | undefined;
+  let searchSequence = 0;
+
+  const setStatus = (message: string) => {
+    if (!status || !results) return;
+    status.textContent = message;
+    status.classList.remove("hidden");
+    results.classList.add("hidden");
+    results.replaceChildren();
+  };
+
+  const loadPagefind = async () => {
+    if (!pagefindPromise) {
+      const pagefindPath = "/pagefind/pagefind.js";
+      pagefindPromise = import(/* @vite-ignore */ pagefindPath).then(
+        async (module: PagefindModule) => {
+          await module.options({ excerptLength: 24 });
+          return module;
+        },
+      );
+    }
+    return pagefindPromise;
+  };
+
+  const renderResults = (items: PagefindResultData[], query: string) => {
+    if (!status || !results) return;
+
+    results.replaceChildren();
+    status.classList.add("hidden");
+    results.classList.remove("hidden");
+
+    const count = document.createElement("li");
+    count.className = "px-3 pb-2 pt-1 text-xs text-gray-400 dark:text-neutral-500";
+    count.textContent = `“${query}” 검색 결과 ${items.length}개`;
+    results.append(count);
+
+    for (const item of items) {
+      const listItem = document.createElement("li");
+      const link = document.createElement("a");
+      const title = document.createElement("span");
+      const excerpt = document.createElement("span");
+
+      link.href = item.url;
+      link.className =
+        "search-result-link block rounded-xl px-3 py-3 outline-none transition-colors hover:bg-brand-50 focus:bg-brand-50 dark:hover:bg-brand-950/50 dark:focus:bg-brand-950/50";
+      title.className =
+        "block font-semibold text-gray-900 dark:text-neutral-100";
+      excerpt.className =
+        "search-result-excerpt mt-1 block text-sm leading-relaxed text-gray-500 dark:text-neutral-400";
+      title.textContent = item.meta.title || item.url;
+      excerpt.innerHTML = item.excerpt;
+
+      link.append(title, excerpt);
+      listItem.append(link);
+      results.append(listItem);
+    }
+  };
+
+  const runSearch = async (rawQuery: string) => {
+    const query = rawQuery.trim();
+    const sequence = ++searchSequence;
+
+    if (!query) {
+      setStatus("제목, 본문, 태그를 검색할 수 있어요.");
+      return;
+    }
+
+    setStatus("검색 중…");
+
+    try {
+      const pagefind = await loadPagefind();
+      const response = await pagefind.search(query);
+      const items = await Promise.all(
+        response.results.slice(0, 8).map((result) => result.data()),
+      );
+
+      if (sequence !== searchSequence) return;
+      if (items.length === 0) {
+        setStatus(`“${query}”에 대한 검색 결과가 없어요.`);
+        return;
+      }
+      renderResults(items, query);
+    } catch (error) {
+      console.error("Unable to load Pagefind:", error);
+      if (sequence === searchSequence) {
+        setStatus(
+          import.meta.env.DEV
+            ? "검색 인덱스는 프로덕션 빌드에서 생성됩니다. pnpm build 후 pnpm preview로 확인해 주세요."
+            : "검색을 불러오지 못했어요. 잠시 후 다시 시도해 주세요.",
+        );
+      }
+    }
+  };
+
+  const openSearch = () => {
+    if (!dialog) return;
+    window.clearTimeout(closeTimer);
+    delete dialog.dataset.closing;
+    if (!dialog.open) dialog.showModal();
+    document.body.style.overflow = "hidden";
+    window.setTimeout(() => input?.focus(), 0);
+  };
+
+  const closeSearch = () => {
+    if (!dialog?.open || dialog.dataset.closing === "true") return;
+
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      dialog.close();
+      return;
+    }
+
+    dialog.dataset.closing = "true";
+    closeTimer = window.setTimeout(() => dialog.close(), 140);
+  };
+
+  document.querySelectorAll<HTMLElement>("[data-search-open]").forEach((trigger) => {
+    trigger.addEventListener("click", openSearch);
+  });
+
+  document.addEventListener("keydown", (event) => {
+    if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
+      event.preventDefault();
+      if (dialog?.open) closeSearch();
+      else openSearch();
+      return;
+    }
+
+    if (!dialog?.open || !results) return;
+    const links = [...results.querySelectorAll<HTMLAnchorElement>(".search-result-link")];
+    if (links.length === 0) return;
+
+    if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+      event.preventDefault();
+      const currentIndex = links.indexOf(document.activeElement as HTMLAnchorElement);
+      const offset = event.key === "ArrowDown" ? 1 : -1;
+      const nextIndex =
+        currentIndex === -1
+          ? offset === 1
+            ? 0
+            : links.length - 1
+          : (currentIndex + offset + links.length) % links.length;
+      links[nextIndex]?.focus();
+    } else if (event.key === "Enter" && document.activeElement === input) {
+      event.preventDefault();
+      links[0]?.click();
+    }
+  });
+
+  input?.addEventListener("input", () => {
+    window.clearTimeout(debounceTimer);
+    debounceTimer = window.setTimeout(() => runSearch(input.value), 160);
+  });
+
+  closeButton?.addEventListener("click", closeSearch);
+  dialog?.addEventListener("cancel", (event) => {
+    event.preventDefault();
+    closeSearch();
+  });
+  dialog?.addEventListener("click", (event) => {
+    if (event.target === dialog) closeSearch();
+  });
+  dialog?.addEventListener("close", () => {
+    window.clearTimeout(closeTimer);
+    delete dialog.dataset.closing;
+    document.body.style.overflow = "";
+  });
+</script>
+
+<style>
+  #search-modal[open] {
+    animation: search-modal-in 160ms ease-out both;
+  }
+
+  #search-modal[open]::backdrop {
+    animation: search-backdrop-in 160ms ease-out both;
+  }
+
+  #search-modal[data-closing="true"] {
+    animation: search-modal-out 140ms ease-in both;
+  }
+
+  #search-modal[data-closing="true"]::backdrop {
+    animation: search-backdrop-out 140ms ease-in both;
+  }
+
+  @keyframes search-modal-in {
+    from {
+      opacity: 0;
+      transform: translateY(-0.5rem) scale(0.98);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  @keyframes search-modal-out {
+    from {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+    to {
+      opacity: 0;
+      transform: translateY(-0.25rem) scale(0.985);
+    }
+  }
+
+  @keyframes search-backdrop-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @keyframes search-backdrop-out {
+    from { opacity: 1; }
+    to { opacity: 0; }
+  }
+
+  :global(.search-result-excerpt mark) {
+    border-radius: 0.2rem;
+    background: var(--color-brand-100);
+    color: var(--color-brand-900);
+    padding-inline: 0.1rem;
+  }
+
+  :global(.dark .search-result-excerpt mark) {
+    background: var(--color-brand-900);
+    color: var(--color-brand-100);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    #search-modal[open],
+    #search-modal[open]::backdrop,
+    #search-modal[data-closing="true"],
+    #search-modal[data-closing="true"]::backdrop {
+      animation: none;
+    }
+  }
+</style>

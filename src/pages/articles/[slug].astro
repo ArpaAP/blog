@@ -125,7 +125,15 @@ const jsonLd = {
   }
 
   <div class="max-w-7xl mx-auto flex flex-col lg:flex-row gap-12">
-    <article class="w-full lg:w-[80%] min-w-0">
+    <article class="w-full lg:w-[80%] min-w-0" data-pagefind-body>
+      <div class="sr-only" aria-hidden="true">
+        <span data-pagefind-meta="title">{post.data.title}</span>
+        {
+          post.data.tags.map((tag) => (
+            <span data-pagefind-filter="tag">{tag}</span>
+          ))
+        }
+      </div>
       <div class="mb-8">
         <a
           href="/articles"

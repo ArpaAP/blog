@@ -95,6 +95,28 @@ const innerContainerClass =
           );
         })
       }
+      <button
+        type="button"
+        data-search-open
+        class="nav-link flex w-full items-center justify-between gap-3 text-base font-medium tracking-wide transition-colors md:w-auto md:text-sm"
+        aria-label="검색 열기"
+        aria-keyshortcuts="Meta+K Control+K"
+      >
+        <span class="flex items-center gap-2">
+          <svg
+            aria-hidden="true"
+            class="size-4"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <circle cx="11" cy="11" r="8"></circle>
+            <path d="m21 21-4.35-4.35"></path>
+          </svg>
+          <span>검색</span>
+        </span>
+        <kbd class="hidden rounded border border-current/20 px-1.5 py-0.5 font-sans text-[10px] opacity-70 lg:inline">⌘K</kbd>
+      </button>
     </div>
   </div>
 </nav>
