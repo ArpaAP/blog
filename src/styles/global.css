@@ -68,3 +68,19 @@ html.dark .astro-code span {
   overflow-y: hidden;
   max-width: 100%;
 }
+
+/* Smooth theme transition via View Transitions API */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 0.2s;
+  animation-timing-function: ease-in-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+}
+

@@ -83,7 +83,7 @@ const GA_ID = import.meta.env.PUBLIC_GA_ID;
       }
     </script>
 	</head>
-	<body class="min-h-screen flex flex-col bg-background dark:bg-neutral-950 text-gray-900 dark:text-neutral-100 antialiased selection:bg-brand-100 dark:selection:bg-brand-900 selection:text-brand-900 dark:selection:text-brand-100">
+	<body class="min-h-screen flex flex-col bg-background dark:bg-neutral-950 text-gray-900 dark:text-neutral-100 antialiased selection:bg-brand-100 dark:selection:bg-brand-900 selection:text-brand-900 dark:selection:text-brand-100 transition-colors duration-200">
     <Navbar isTransparent={transparentNavbar} />
     
     <slot name="hero" />
@@ -92,7 +92,7 @@ const GA_ID = import.meta.env.PUBLIC_GA_ID;
       <slot />
     </main>
 
-    <footer class="w-full max-w-5xl mx-auto px-6 py-8 border-t border-gray-100 dark:border-neutral-800 text-center text-sm text-gray-400 dark:text-neutral-500 flex flex-col gap-4 items-center">
+    <footer class="w-full max-w-5xl mx-auto px-6 py-8 border-t border-gray-100 dark:border-neutral-800 text-center text-sm text-gray-400 dark:text-neutral-500 flex flex-col gap-4 items-center transition-colors duration-200">
       <div>
         &copy; {new Date().getFullYear()} Devlog Alpha. All rights reserved.
       </div>
