@@ -1,11 +1,13 @@
 ---
 import type { CollectionEntry } from 'astro:content';
+import { getArticleSlug } from '@/utils/article';
 
 interface Props {
   post: CollectionEntry<'articles'>;
 }
 
 const { post } = Astro.props;
+const slug = getArticleSlug(post);
 const date = new Date(post.data.published_at).toLocaleDateString('ko-KR', {
   year: 'numeric',
   month: 'numeric',
@@ -13,7 +15,7 @@ const date = new Date(post.data.published_at).toLocaleDateString('ko-KR', {
 });
 ---
 
-<a href={`/articles/${post.id}`} class="group flex flex-col sm:flex-row gap-2 sm:gap-8 py-6 border-b border-gray-100 dark:border-white/5 hover:bg-gray-50 dark:hover:bg-white/1 transition-colors -mx-4 px-4">
+<a href={`/articles/${slug}`} class="group flex flex-col sm:flex-row gap-2 sm:gap-8 py-6 border-b border-gray-100 dark:border-white/5 hover:bg-gray-50 dark:hover:bg-white/1 transition-colors -mx-4 px-4">
   <div class="sm:w-32 shrink-0 pt-1">
     <time datetime={post.data.published_at.toISOString()} class="text-sm text-gray-400 font-mono">{date}</time>
   </div>

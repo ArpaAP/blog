@@ -6,13 +6,26 @@ import GiscusComments from "@/components/GiscusComments.astro";
 import { getCollection, render } from "astro:content";
 import type { CollectionEntry } from "astro:content";
 import { Image } from "astro:assets";
+import { getArticleSlug } from "@/utils/article";
 
 export async function getStaticPaths() {
   const posts = await getCollection("articles");
-  return posts.map((post) => ({
-    params: { slug: post.id },
-    props: { post },
-  }));
+  const slugs = new Set<string>();
+
+  return posts.map((post) => {
+    const slug = getArticleSlug(post);
+    if (slugs.has(slug)) {
+      throw new Error(
+        `Duplicate article slug "${slug}" detected in "${post.id}". Article filenames must be unique across all subdirectories.`
+      );
+    }
+    slugs.add(slug);
+
+    return {
+      params: { slug },
+      props: { post },
+    };
+  });
 }
 
 interface Props {
@@ -20,6 +33,7 @@ interface Props {
 }
 
 const { post } = Astro.props;
+const slug = getArticleSlug(post);
 const { Content, headings, remarkPluginFrontmatter } = await render(post);
 const ogImage = post.data.feature_image
   ? new URL(post.data.feature_image.src, Astro.site).href
@@ -35,7 +49,7 @@ const date = new Date(post.data.published_at).toLocaleDateString("ko-KR", {
   day: "numeric",
 });
 
-const articleUrl = new URL(`/articles/${post.id}`, Astro.site).href;
+const articleUrl = new URL(`/articles/${slug}`, Astro.site).href;
 const jsonLd = {
   "@context": "https://schema.org",
   "@type": "BlogPosting",
