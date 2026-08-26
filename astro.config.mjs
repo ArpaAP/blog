@@ -1,4 +1,4 @@
-import { defineConfig } from "astro/config";
+import { defineConfig, fontProviders } from "astro/config";
 import tailwindcss from "@tailwindcss/vite";
 import mdx from "@astrojs/mdx";
 import sitemap from "@astrojs/sitemap";
@@ -23,6 +23,13 @@ export default defineConfig({
     mdx(),
     process.env.NODE_ENV === "development" ? keystatic() : null,
   ].filter(Boolean),
+  fonts: [
+    {
+      provider: fontProviders.fontsource(),
+      name: "Dancing Script",
+      cssVariable: "--font-dancing-script",
+    },
+  ],
   markdown: {
     processor: unified({
       remarkPlugins: [remarkReadingTime, remarkMath],
