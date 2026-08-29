@@ -7,7 +7,7 @@ interface NavLink {
 export const links: NavLink[] = [
   { name: "소개", href: "/" },
   { name: "프로젝트", href: "/projects" },
-  { name: "게시글", href: "/articles" },
+  { name: "스토리", href: "/articles" },
   ...(process.env.NODE_ENV === "development"
     ? [{ name: "Keystatic", href: "/keystatic", newTab: true }]
     : []),
