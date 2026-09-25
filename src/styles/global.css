@@ -52,6 +52,28 @@ html.dark .astro-code span {
 }
 
 @utility prose {
+  a {
+    overflow-wrap: anywhere;
+  }
+
+  /* Typography adds decorative backticks around inline code. */
+  :where(code):not(:where(pre *)) {
+    padding: 0.125rem 0.375rem;
+    border: 1px solid var(--color-slate-200);
+    border-radius: 0.25rem;
+    background-color: var(--color-slate-100);
+
+    @variant dark {
+      border-color: var(--color-slate-700);
+      background-color: var(--color-slate-800);
+    }
+
+    &::before,
+    &::after {
+      content: none;
+    }
+  }
+
   blockquote {
     /* Disable adding quote marks to block-quotes: https://github.com/tailwindlabs/tailwindcss-typography/issues/66 */
     p {
@@ -149,6 +171,10 @@ details.footnote-details:not([open]) .footnote-toggle-hint-open {
 }
 
 /* Compact spacing and paragraph margins inside footnotes */
+.footnote-content a {
+  overflow-wrap: anywhere;
+}
+
 .footnote-content p {
   margin: 0 !important;
   display: inline !important;
