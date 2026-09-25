@@ -85,3 +85,139 @@ html.dark .astro-code span {
   }
 }
 
+/* ==========================================================================
+   Footnotes Styling
+   ========================================================================== */
+
+/* Footnote Reference Super-badge */
+a[data-footnote-ref] {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.72rem;
+  line-height: 1;
+  font-weight: 600;
+  color: var(--color-brand-600);
+  background-color: var(--color-brand-50);
+  border: 1px solid var(--color-brand-200);
+  border-radius: 0.375rem;
+  padding: 0.15rem 0.35rem;
+  margin: 0 0.15rem;
+  text-decoration: none !important;
+  vertical-align: 0.4em;
+  transition: all 0.15s ease-in-out;
+  cursor: pointer;
+}
+
+html.dark a[data-footnote-ref] {
+  color: var(--color-brand-300);
+  background-color: rgba(124, 58, 237, 0.15);
+  border-color: rgba(139, 92, 246, 0.35);
+}
+
+a[data-footnote-ref]:hover {
+  color: var(--color-brand-700);
+  background-color: var(--color-brand-100);
+  border-color: var(--color-brand-400);
+  transform: translateY(-1px);
+  box-shadow: 0 1px 3px rgba(124, 58, 237, 0.15);
+}
+
+html.dark a[data-footnote-ref]:hover {
+  color: var(--color-brand-200);
+  background-color: rgba(124, 58, 237, 0.35);
+  border-color: rgba(167, 139, 250, 0.5);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* Remove default details marker */
+details.footnote-details summary::-webkit-details-marker {
+  display: none;
+}
+
+/* Details chevron rotation & hints */
+details.footnote-details[open] .footnote-chevron {
+  transform: rotate(180deg);
+}
+
+details.footnote-details[open] .footnote-toggle-hint {
+  display: none;
+}
+
+details.footnote-details:not([open]) .footnote-toggle-hint-open {
+  display: none;
+}
+
+/* Compact spacing and paragraph margins inside footnotes */
+.footnote-content p {
+  margin: 0 !important;
+  display: inline !important;
+}
+
+/* Footnote row in footnote list */
+.footnote-item {
+  cursor: pointer;
+  user-select: text;
+}
+
+.footnote-item:focus-visible {
+  outline: 2px solid var(--color-brand-500);
+  outline-offset: 1px;
+}
+
+/* Links inside footnote text */
+.footnote-content a {
+  color: var(--color-brand-600);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+html.dark .footnote-content a {
+  color: var(--color-brand-400);
+}
+
+.footnote-content a:hover {
+  color: var(--color-brand-700);
+}
+
+html.dark .footnote-content a:hover {
+  color: var(--color-brand-300);
+}
+
+/* Popover & modal link styles */
+.footnote-popover-body a,
+#footnote-modal-body a {
+  color: var(--color-brand-600);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+html.dark .footnote-popover-body a,
+html.dark #footnote-modal-body a {
+  color: var(--color-brand-400);
+}
+
+/* Highlight animations for jump navigation */
+@keyframes footnoteHighlight {
+  0% {
+    background-color: rgba(124, 58, 237, 0.25);
+    box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.3);
+  }
+  70% {
+    background-color: rgba(124, 58, 237, 0.15);
+    box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.2);
+  }
+  100% {
+    background-color: transparent;
+    box-shadow: 0 0 0 0 transparent;
+  }
+}
+
+.footnote-highlight {
+  animation: footnoteHighlight 2s ease-out forwards;
+}
+
+.footnote-ref-highlight {
+  animation: footnoteHighlight 1.5s ease-out forwards;
+}
+

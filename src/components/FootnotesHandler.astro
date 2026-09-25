@@ -1,0 +1,397 @@
+---
+// src/components/FootnotesHandler.astro
+---
+
+<!-- Desktop Popover -->
+<div
+  id="footnote-popover"
+  role="tooltip"
+  aria-hidden="true"
+  class="fixed z-50 max-w-sm w-max rounded-xl bg-white/95 dark:bg-neutral-900/95 backdrop-blur-md border border-gray-200/90 dark:border-neutral-700/80 shadow-xl px-4 py-3 text-sm text-slate-700 dark:text-neutral-200 opacity-0 invisible pointer-events-none transition-opacity duration-150 ease-out"
+  style="max-width: min(24rem, calc(100vw - 2rem));"
+>
+  <div id="footnote-popover-body" class="footnote-popover-body leading-relaxed break-words"></div>
+</div>
+
+<!-- Mobile Modal Dialog -->
+<div
+  id="footnote-modal-backdrop"
+  class="fixed inset-0 bg-black/60 backdrop-blur-xs z-50 opacity-0 pointer-events-none transition-opacity duration-200"
+  aria-hidden="true"
+></div>
+
+<dialog
+  id="footnote-modal"
+  class="fixed inset-x-0 bottom-0 sm:bottom-auto sm:top-1/2 sm:-translate-y-1/2 sm:inset-x-auto sm:left-1/2 sm:-translate-x-1/2 m-0 p-0 max-h-[85vh] w-full sm:max-w-md rounded-t-2xl sm:rounded-2xl bg-white dark:bg-neutral-900 border-t sm:border border-gray-200/80 dark:border-neutral-800 shadow-2xl z-50 opacity-0 pointer-events-none translate-y-full sm:translate-y-0 sm:scale-95 transition-all duration-200 overflow-hidden flex flex-col"
+  aria-labelledby="footnote-modal-title"
+>
+  <!-- Mobile drag indicator -->
+  <div class="pt-2.5 pb-1 flex justify-center sm:hidden">
+    <div class="w-10 h-1 bg-gray-300 dark:bg-neutral-700 rounded-full"></div>
+  </div>
+
+  <!-- Modal Header -->
+  <div class="flex items-center justify-between px-5 py-3 border-b border-gray-100 dark:border-neutral-800/80">
+    <div class="flex items-center gap-2">
+      <svg class="w-4 h-4 text-brand-600 dark:text-brand-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-0.5-.05"></path>
+        <path d="M6 2v20"></path>
+      </svg>
+      <h3 id="footnote-modal-title" class="text-sm font-bold text-slate-800 dark:text-neutral-100">
+        각주
+      </h3>
+    </div>
+    <button
+      id="footnote-modal-close-btn"
+      type="button"
+      class="p-1.5 -mr-1.5 text-slate-400 hover:text-slate-600 dark:text-neutral-400 dark:hover:text-neutral-200 rounded-lg hover:bg-gray-100 dark:hover:bg-neutral-800 transition-colors"
+      aria-label="닫기"
+    >
+      <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M18 6 6 18"></path>
+        <path d="m6 6 12 12"></path>
+      </svg>
+    </button>
+  </div>
+
+  <!-- Modal Content -->
+  <div
+    id="footnote-modal-body"
+    class="p-5 overflow-y-auto text-sm text-slate-700 dark:text-neutral-200 leading-relaxed max-h-[50vh]"
+  ></div>
+
+  <!-- Modal Footer -->
+  <div class="px-5 py-3 bg-gray-50/70 dark:bg-neutral-800/40 border-t border-gray-100 dark:border-neutral-800/80 flex items-center justify-between gap-3">
+    <button
+      id="footnote-modal-jump-btn"
+      type="button"
+      class="inline-flex items-center gap-1.5 text-xs font-semibold text-brand-600 dark:text-brand-400 hover:text-brand-700 dark:hover:text-brand-300 py-1.5 px-2.5 rounded-lg hover:bg-brand-50 dark:hover:bg-brand-950/50 transition-colors"
+    >
+      <svg class="w-3.5 h-3.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="m7 13 5 5 5-5"></path>
+        <path d="M12 18V6"></path>
+      </svg>
+      각주란에서 보기
+    </button>
+    <button
+      id="footnote-modal-dismiss-btn"
+      type="button"
+      class="text-xs font-medium text-slate-500 hover:text-slate-700 dark:text-neutral-400 dark:hover:text-neutral-200 py-1.5 px-3 rounded-lg hover:bg-gray-200/50 dark:hover:bg-neutral-700/50 transition-colors"
+    >
+      닫기
+    </button>
+  </div>
+</dialog>
+
+<script>
+  function initFootnotes() {
+    const refLinks = document.querySelectorAll<HTMLAnchorElement>("a[data-footnote-ref]");
+    if (refLinks.length === 0) return;
+
+    const popover = document.getElementById("footnote-popover");
+    const popoverBody = document.getElementById("footnote-popover-body");
+
+    const modal = document.getElementById("footnote-modal") as HTMLDialogElement | null;
+    const modalBackdrop = document.getElementById("footnote-modal-backdrop");
+    const modalTitle = document.getElementById("footnote-modal-title");
+    const modalBody = document.getElementById("footnote-modal-body");
+    const modalCloseBtn = document.getElementById("footnote-modal-close-btn");
+    const modalDismissBtn = document.getElementById("footnote-modal-dismiss-btn");
+    const modalJumpBtn = document.getElementById("footnote-modal-jump-btn");
+
+    let popoverTimeout: ReturnType<typeof setTimeout> | null = null;
+    let currentTargetId: string | null = null;
+
+    // Helper: Is this device hover-capable with a fine pointer (mouse)?
+    function isHoverCapable(): boolean {
+      return window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+    }
+
+    // Helper: Extract footnote data
+    function getFootnoteData(ref: HTMLAnchorElement) {
+      const href = ref.getAttribute("href");
+      if (!href || !href.startsWith("#")) return null;
+      const targetId = decodeURIComponent(href.slice(1));
+      const targetEl = document.getElementById(targetId);
+      if (!targetEl) return null;
+
+      // Clone content and remove backref link & number from popover/modal preview
+      const clone = targetEl.cloneNode(true) as HTMLElement;
+      clone.querySelectorAll(".footnote-num, .footnote-num-link, .footnote-backref").forEach((el) => el.remove());
+      const bodyEl = clone.querySelector(".footnote-body");
+      const html = bodyEl ? bodyEl.innerHTML : clone.innerHTML;
+
+      const refNumber = ref.textContent?.trim() || "";
+
+      return {
+        targetId,
+        targetEl,
+        refNumber,
+        html,
+      };
+    }
+
+    // --- Desktop Popover Logic ---
+    function showPopover(ref: HTMLAnchorElement) {
+      if (!popover || !popoverBody) return;
+      const data = getFootnoteData(ref);
+      if (!data) return;
+
+      currentTargetId = data.targetId;
+
+      // Render simple '[1] content' format
+      popoverBody.innerHTML = `<span class="font-bold text-brand-600 dark:text-brand-400 mr-1.5 select-none">[${data.refNumber}]</span>${data.html}`;
+
+      // Position popover BEFORE making visible to avoid any flying animation
+      updatePopoverPosition(ref);
+
+      popover.classList.remove("opacity-0", "invisible", "pointer-events-none");
+      popover.classList.add("opacity-100", "pointer-events-auto");
+      popover.setAttribute("aria-hidden", "false");
+    }
+
+    function hidePopover() {
+      if (!popover) return;
+      popover.classList.add("opacity-0", "invisible", "pointer-events-none");
+      popover.classList.remove("opacity-100", "pointer-events-auto");
+      popover.setAttribute("aria-hidden", "true");
+      currentTargetId = null;
+    }
+
+    function scheduleHidePopover() {
+      if (popoverTimeout) clearTimeout(popoverTimeout);
+      popoverTimeout = setTimeout(() => {
+        hidePopover();
+      }, 200);
+    }
+
+    function cancelHidePopover() {
+      if (popoverTimeout) {
+        clearTimeout(popoverTimeout);
+        popoverTimeout = null;
+      }
+    }
+
+    function updatePopoverPosition(ref: HTMLAnchorElement) {
+      if (!popover) return;
+      const refRect = ref.getBoundingClientRect();
+      const popoverRect = popover.getBoundingClientRect();
+      const padding = 12;
+
+      // Determine vertical placement: above by default, below if not enough space
+      let top: number;
+      const spaceAbove = refRect.top;
+      const spaceBelow = window.innerHeight - refRect.bottom;
+
+      if (spaceAbove >= popoverRect.height + padding || spaceAbove > spaceBelow) {
+        top = refRect.top - popoverRect.height - 8;
+      } else {
+        top = refRect.bottom + 8;
+      }
+
+      // Horizontal centering relative to ref
+      let left = refRect.left + refRect.width / 2 - popoverRect.width / 2;
+      left = Math.max(padding, Math.min(left, window.innerWidth - popoverRect.width - padding));
+
+      popover.style.top = `${top}px`;
+      popover.style.left = `${left}px`;
+    }
+
+    // Keep popover open on hover over popover itself
+    popover?.addEventListener("mouseenter", cancelHidePopover);
+    popover?.addEventListener("mouseleave", scheduleHidePopover);
+
+    // --- Action: Jump to Footnote in Bottom Section ---
+    function jumpToFootnote(targetId: string) {
+      const details = document.getElementById("footnote-details") as HTMLDetailsElement | null;
+      if (details && !details.open) {
+        details.open = true;
+      }
+
+      const target = document.getElementById(targetId);
+      if (target) {
+        target.scrollIntoView({ behavior: "smooth", block: "center" });
+
+        // Highlight effect
+        target.classList.remove("footnote-highlight");
+        void target.offsetWidth;
+        target.classList.add("footnote-highlight");
+
+        setTimeout(() => {
+          target.classList.remove("footnote-highlight");
+        }, 2200);
+
+        history.pushState(null, "", `#${targetId}`);
+      }
+    }
+
+    // --- Action: Jump to Footnote Ref in Text ---
+    function jumpToRef(refId: string) {
+      const ref = document.getElementById(refId);
+      if (ref) {
+        ref.scrollIntoView({ behavior: "smooth", block: "center" });
+
+        ref.classList.remove("footnote-ref-highlight");
+        void ref.offsetWidth;
+        ref.classList.add("footnote-ref-highlight");
+
+        setTimeout(() => {
+          ref.classList.remove("footnote-ref-highlight");
+        }, 1600);
+
+        history.pushState(null, "", `#${refId}`);
+      }
+    }
+
+    // --- Mobile Modal Logic ---
+    function openModal(ref: HTMLAnchorElement) {
+      if (!modal || !modalBackdrop || !modalTitle || !modalBody) return;
+      const data = getFootnoteData(ref);
+      if (!data) return;
+
+      currentTargetId = data.targetId;
+      modalTitle.textContent = `각주 [${data.refNumber}]`;
+      modalBody.innerHTML = data.html;
+
+      modalBackdrop.classList.remove("opacity-0", "pointer-events-none");
+      modalBackdrop.classList.add("opacity-100", "pointer-events-auto");
+
+      modal.classList.remove("opacity-0", "pointer-events-none", "translate-y-full", "sm:scale-95");
+      modal.classList.add("opacity-100", "pointer-events-auto", "translate-y-0", "sm:scale-100");
+
+      document.body.style.overflow = "hidden";
+    }
+
+    function closeModal() {
+      if (!modal || !modalBackdrop) return;
+
+      modalBackdrop.classList.remove("opacity-100", "pointer-events-auto");
+      modalBackdrop.classList.add("opacity-0", "pointer-events-none");
+
+      modal.classList.remove("opacity-100", "pointer-events-auto", "translate-y-0", "sm:scale-100");
+      modal.classList.add("opacity-0", "pointer-events-none", "translate-y-full", "sm:scale-95");
+
+      document.body.style.overflow = "";
+    }
+
+    modalCloseBtn?.addEventListener("click", closeModal);
+    modalDismissBtn?.addEventListener("click", closeModal);
+    modalBackdrop?.addEventListener("click", closeModal);
+
+    modalJumpBtn?.addEventListener("click", () => {
+      if (currentTargetId) {
+        const id = currentTargetId;
+        closeModal();
+        setTimeout(() => {
+          jumpToFootnote(id);
+        }, 150);
+      }
+    });
+
+    window.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && modal && !modal.classList.contains("opacity-0")) {
+        closeModal();
+      }
+    });
+
+    // --- Attach Ref Listeners ---
+    refLinks.forEach((ref) => {
+      // Desktop Hover
+      ref.addEventListener("mouseenter", (e) => {
+        if (isHoverCapable() && (e as MouseEvent).clientX !== 0) {
+          cancelHidePopover();
+          showPopover(ref);
+        }
+      });
+
+      ref.addEventListener("mouseleave", () => {
+        if (isHoverCapable()) {
+          scheduleHidePopover();
+        }
+      });
+
+      // Keyboard Focus
+      ref.addEventListener("focus", () => {
+        if (isHoverCapable()) {
+          cancelHidePopover();
+          showPopover(ref);
+        }
+      });
+
+      ref.addEventListener("blur", () => {
+        if (isHoverCapable()) {
+          scheduleHidePopover();
+        }
+      });
+
+      // Click: PC -> Jump to bottom; Mobile / Touch -> Open Modal
+      ref.addEventListener("click", (e) => {
+        e.preventDefault();
+
+        const isTouch = !isHoverCapable() || (e as PointerEvent).pointerType === "touch";
+        const data = getFootnoteData(ref);
+        if (!data) return;
+
+        if (isTouch) {
+          // Mobile: Open Modal
+          hidePopover();
+          openModal(ref);
+        } else {
+          // PC: Jump to bottom footnote section
+          hidePopover();
+          jumpToFootnote(data.targetId);
+        }
+      });
+    });
+
+    // --- Footnote Item Click Listeners (Entire line clickable to jump back) ---
+    document.querySelectorAll<HTMLElement>(".footnote-item[data-footnote-backref], [data-footnote-backref]").forEach((item) => {
+      // Click on entire line
+      item.addEventListener("click", (e) => {
+        // If clicking an internal link in the footnote (e.g. external reference URL), allow normal link click
+        if ((e.target as HTMLElement).closest("a:not([data-footnote-backref])")) {
+          return;
+        }
+        e.preventDefault();
+        const href = item.getAttribute("data-href") || item.getAttribute("href");
+        if (href && href.startsWith("#")) {
+          const refId = decodeURIComponent(href.slice(1));
+          jumpToRef(refId);
+        }
+      });
+
+      // Keyboard navigation (Enter / Space)
+      item.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          if ((e.target as HTMLElement).closest("a:not([data-footnote-backref])")) {
+            return;
+          }
+          e.preventDefault();
+          const href = item.getAttribute("data-href") || item.getAttribute("href");
+          if (href && href.startsWith("#")) {
+            const refId = decodeURIComponent(href.slice(1));
+            jumpToRef(refId);
+          }
+        }
+      });
+    });
+
+    // --- Handle Direct Hash Navigation (e.g. page opened with #user-content-fn-1) ---
+    if (window.location.hash) {
+      const hashId = decodeURIComponent(window.location.hash.slice(1));
+      if (hashId.startsWith("user-content-fn-")) {
+        setTimeout(() => {
+          jumpToFootnote(hashId);
+        }, 300);
+      }
+    }
+  }
+
+  // Support both standard load and Astro page transitions
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", initFootnotes);
+  } else {
+    initFootnotes();
+  }
+  document.addEventListener("astro:page-load", initFootnotes);
+</script>

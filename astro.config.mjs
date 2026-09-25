@@ -9,6 +9,7 @@ import react from "@astrojs/react";
 import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
 import rehypeExternalLinks from "rehype-external-links";
+import { rehypeFootnotes } from "./src/utils/rehype-footnotes.mjs";
 import { unified } from "@astrojs/markdown-remark";
 
 // https://astro.build/config
@@ -97,6 +98,7 @@ export default defineConfig({
             },
           },
         ],
+        rehypeFootnotes,
       ],
     }),
     shikiConfig: {
