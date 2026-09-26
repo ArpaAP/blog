@@ -36,8 +36,11 @@ All commands are run from the root of the project, from a terminal:
 | `pnpm build`           | Build your production site to `./dist/`          |
 | `pnpm preview`         | Preview your build locally, before deploying     |
 | `pnpm astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `pnpm astro -- --help` | Get help using the Astro CLI                     |
 
 ## 👀 Want to learn more?
 
 Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
+
+## Article navigation
+
+On article pages with headings, the mobile table of contents slides down from behind the navbar when the first section reaches the reading area. It shows the current section and a circular article-reading progress indicator; tapping it opens the full heading list. The bar uses the navbar's translucent background and blur. Desktop readers retain the sidebar table of contents. Both navigate to the selected heading.

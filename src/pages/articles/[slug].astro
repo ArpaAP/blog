@@ -126,6 +126,39 @@ const jsonLd = {
     ) : null
   }
 
+  {
+    tocHeadings.length > 0 && (
+      <details id="mobile-toc" inert class="group pointer-events-none fixed inset-x-0 top-[69px] z-40 -translate-y-12 opacity-0 transition-[translate,opacity] duration-300 ease-out data-[visible=true]:pointer-events-auto data-[visible=true]:translate-y-0 data-[visible=true]:opacity-100 motion-reduce:transition-none lg:hidden">
+        <summary class="flex min-h-12 cursor-pointer list-none items-center gap-3 border-b border-gray-100 bg-background/90 px-6 text-sm backdrop-blur-sm focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-brand-600 dark:border-neutral-800 dark:bg-neutral-950/90 [&::-webkit-details-marker]:hidden">
+          <svg id="mobile-toc-progress" role="progressbar" aria-label="글 읽기 진행도" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" class="size-5 shrink-0 -rotate-90 text-brand-600 dark:text-brand-300" viewBox="0 0 24 24" fill="none">
+            <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-opacity="0.2" stroke-width="2.5" />
+            <circle id="mobile-toc-progress-ring" cx="12" cy="12" r="9" pathLength="100" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="0 100" />
+          </svg>
+          <span id="mobile-toc-current" class="min-w-0 flex-1 truncate font-medium text-slate-700 dark:text-neutral-200" aria-live="polite">{tocHeadings[0].text}</span>
+          <svg aria-hidden="true" class="size-4 shrink-0 text-slate-500 transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m6 9 6 6 6-6" />
+          </svg>
+        </summary>
+        <nav aria-label="글 목차" class="absolute inset-x-0 top-12 max-h-[min(60vh,24rem)] overflow-y-auto border-b border-gray-200 bg-background/90 shadow-lg backdrop-blur-sm dark:border-neutral-800 dark:bg-neutral-950/90">
+          <ul class="py-2">
+            {tocHeadings.map((heading) => (
+              <li>
+                <a
+                  href={`#${heading.slug}`}
+                  class="mobile-toc-link block border-l-2 border-transparent py-2 pr-6 text-sm text-slate-600 hover:bg-brand-50 dark:text-neutral-300 dark:hover:bg-neutral-800"
+                  data-slug={heading.slug}
+                  style={{ paddingLeft: `${1.5 + (heading.depth - minDepth) * 0.75}rem` }}
+                >
+                  {heading.text}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </nav>
+      </details>
+    )
+  }
+
   <div class="max-w-7xl mx-auto flex flex-col lg:flex-row gap-12">
     <article class="w-full lg:w-[80%] min-w-0" data-pagefind-body>
       <div class="sr-only" aria-hidden="true">
@@ -231,47 +264,79 @@ const jsonLd = {
       "dark:!border-brand-300",
     ];
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            const id = entry.target.getAttribute("id");
-            document.querySelectorAll(".toc-link").forEach((l) => {
-              l.classList.remove(...ACTIVE_CLASSES);
-            });
+    const mobileToc = document.querySelector<HTMLDetailsElement>("#mobile-toc");
+    const currentLabel = document.querySelector<HTMLElement>("#mobile-toc-current");
+    const progressIndicator = document.querySelector<SVGElement>("#mobile-toc-progress");
+    const progressRing = document.querySelector<SVGCircleElement>("#mobile-toc-progress-ring");
+    const article = document.querySelector<HTMLElement>("article[data-pagefind-body]");
+    const links = [...document.querySelectorAll<HTMLAnchorElement>(".toc-link, .mobile-toc-link")];
+    const headings = [...document.querySelectorAll<HTMLElement>(".prose h1[id], .prose h2[id], .prose h3[id], .prose h4[id]")]
+      .filter((heading) => links.some((link) => link.dataset.slug === heading.id));
+    let activeId: string | null = null;
 
-            const link = document.querySelector(`.toc-link[data-slug="${id}"]`);
-            if (link) {
-              link.classList.add(...ACTIVE_CLASSES);
-              link.scrollIntoView({ block: "nearest", behavior: "smooth" });
-            }
-          }
-        });
-      },
-      {
-        rootMargin: "-100px 0px -66% 0px",
-      },
-    );
-
-    document
-      .querySelectorAll(".prose h1, .prose h2, .prose h3, .prose h4")
-      .forEach((heading) => {
-        observer.observe(heading);
-      });
-
-    document.querySelectorAll(".toc-link").forEach((link) => {
-      link.addEventListener("click", (e) => {
-        e.preventDefault();
-        const targetId = link.getAttribute("href")?.substring(1);
-        const target = document.getElementById(targetId!);
-        if (target) {
-          window.scrollTo({
-            top: target.offsetTop - 100,
-            behavior: "smooth",
-          });
-          history.pushState(null, "", `#${targetId}`);
+    function setActive(id: string | null) {
+      if (id === activeId) return;
+      activeId = id;
+      for (const link of links) {
+        const active = link.dataset.slug === id;
+        for (const className of ACTIVE_CLASSES) link.classList.toggle(className, active);
+        if (active) link.setAttribute("aria-current", "location");
+        else link.removeAttribute("aria-current");
+        if (active && window.innerWidth >= 1024 && link.classList.contains("toc-link")) {
+          link.scrollIntoView({ block: "nearest" });
         }
+      }
+      if (currentLabel) {
+        currentLabel.textContent = links.find((link) => link.classList.contains("mobile-toc-link") && link.dataset.slug === (id ?? headings[0]?.id))?.textContent?.trim() || "";
+      }
+    }
+
+    function updateActive() {
+      const offset = window.innerWidth < 1024 ? 145 : 110;
+      let current: string | null = null;
+      for (const heading of headings) {
+        if (heading.getBoundingClientRect().top > offset) break;
+        current = heading.id;
+      }
+      setActive(current);
+      if (!mobileToc || !headings.length || !article) return;
+      const visible = current !== null;
+      if (mobileToc.dataset.visible !== String(visible)) {
+        mobileToc.dataset.visible = String(visible);
+        mobileToc.inert = !visible;
+      }
+      if (!current) mobileToc.removeAttribute("open");
+      const firstTop = headings[0].getBoundingClientRect().top;
+      const articleBottom = article.getBoundingClientRect().bottom;
+      const total = Math.max(1, articleBottom - firstTop - window.innerHeight + offset);
+      const progress = Math.round(Math.max(0, Math.min(100, (offset - firstTop) / total * 100)));
+      progressRing?.setAttribute("stroke-dasharray", `${progress} 100`);
+      progressIndicator?.setAttribute("aria-valuenow", String(progress));
+    }
+
+    let scheduled = false;
+    window.addEventListener("scroll", () => {
+      if (scheduled) return;
+      scheduled = true;
+      requestAnimationFrame(() => {
+        updateActive();
+        scheduled = false;
       });
-    });
+    }, { passive: true });
+    window.addEventListener("resize", updateActive);
+    updateActive();
+
+    for (const link of links) {
+      link.addEventListener("click", (event) => {
+        const target = headings.find((heading) => heading.id === link.dataset.slug);
+        if (!target) return;
+        event.preventDefault();
+        mobileToc?.removeAttribute("open");
+        setActive(target.id);
+        const offset = window.innerWidth < 1024 ? 133 : 100;
+        window.scrollTo({ top: target.getBoundingClientRect().top + window.scrollY - offset, behavior: "smooth" });
+        history.pushState(null, "", `#${target.id}`);
+      });
+    }
   </script>
 </BaseLayout>
